@@ -3,6 +3,7 @@
 @import './transition.scss';
 @import './element-ui.scss';
 @import './sidebar.scss';
+@import './btn.scss';
 
 body {
   height: 100%;
@@ -54,7 +55,7 @@ a:hover {
 
 div:focus{
   outline: none;
-}
+ }
 
 .fr {
   float: right;

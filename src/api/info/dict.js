@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getDictList(params) {
   return request({
-    url: '/user/dict/list',
+    url: 'api/info/dict/list',
     method: 'get',
     params: params
   })
@@ -10,7 +10,7 @@ export function getDictList(params) {
 
 export function saveDict(data) {
   return request({
-    url: '/user/dict/save',
+    url: 'api/info/dict/save',
     method: 'post',
     data
   })
@@ -18,7 +18,7 @@ export function saveDict(data) {
 
 export function getDict(params) {
   return request({
-    url: '/user/dict/info',
+    url: 'api/info/dict/info',
     method: 'get',
     params: params
   })
@@ -26,7 +26,7 @@ export function getDict(params) {
 
 export function deleteDict(data) {
   return request({
-    url: '/user/dict/delete',
+    url: 'api/info/dict/delete',
     method: 'post',
     data
   })
@@ -34,7 +34,7 @@ export function deleteDict(data) {
 
 export function getDictType(params) {
   return request({
-    url: '/user/dict/dict_list',
+    url: 'api/info/dict/dict_list',
     method: 'get',
     params: params
   })

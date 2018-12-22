@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getList(params) {
   return request({
-    url: '/user/supplier/list',
+    url: 'api/info/supplier/list',
     method: 'get',
     params: params
   })
@@ -10,7 +10,7 @@ export function getList(params) {
 
 export function save(data) {
   return request({
-    url: '/user/supplier/save',
+    url: 'api/info/supplier/save',
     method: 'post',
     data
   })
@@ -18,7 +18,7 @@ export function save(data) {
 
 export function get(params) {
   return request({
-    url: '/user/supplier/info',
+    url: 'api/info/supplier/info',
     method: 'get',
     params: params
   })
@@ -26,7 +26,7 @@ export function get(params) {
 
 export function deleteEle(data) {
   return request({
-    url: '/user/supplier/delete',
+    url: 'api/info/supplier/delete',
     method: 'post',
     data
   })

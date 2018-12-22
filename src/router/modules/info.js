@@ -101,16 +101,58 @@ const infoRouter = {
       meta: {title: '渠道资料-详情'}
     },
     {
-      path: 'tree-table',
-      component: () => import('@/views/table/treeTable/treeTable'),
-      name: 'TreeTableDemo',
+      path: 'goods',
+      component: () => import('@/z/info/goods/list'),
+      name: 'goods',
       meta: {title: '货品资料'}
     },
     {
-      path: 'custom-tree-table',
-      component: () => import('@/views/table/treeTable/customTreeTable'),
-      name: 'CustomTreeTableDemo',
+      path: 'goods_create',
+      component: () => import('@/z/info/goods/detail'),
+      name: 'goods_create',
+      hidden: true,
+      meta: {title: '货品资料-新增'}
+    },
+    {
+      path: 'goods_update/:id',
+      component: () => import('@/z/info/goods/detail'),
+      name: 'goods_update',
+      hidden: true,
+      meta: {title: '货品资料-修改'}
+    },
+    {
+      path: 'goods_detail/:id',
+      component: () => import('@/z/info/goods/detail'),
+      name: 'goods_detail',
+      hidden: true,
+      meta: {title: '货品资料-详情'}
+    },
+    {
+      path: 'barCode',
+      component: () => import('@/z/info/barCode/list'),
+      name: 'barCode',
       meta: {title: '条形码资料'}
+    },
+    {
+      path: 'barCode_create',
+      component: () => import('@/z/info/barCode/detail'),
+      name: 'employ_create',
+      hidden: true,
+      meta: {title: '条形码资料-新增'}
+    },
+    {
+      path: 'barCode_update/:id',
+      component: () => import('@/z/info/barCode/detail'),
+      name: 'barCode_update',
+      hidden: true,
+      meta: {title: '条形码资料-修改'}
+    },
+    {
+      path: 'barCode_detail/:id',
+      component: () => import('@/z/info/barCode/detail'),
+      name: 'barCode_detail',
+      hidden: true,
+      meta: {title: '条形码资料-详情'}
     },
     {
       path: 'employ',

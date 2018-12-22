@@ -91,4 +91,15 @@
   .tab-container {
     margin: 10px;
   }
+  .is-disabled >>> .el-input__inner{
+    color:#606266 !important;
+  }
+
+  .el-select>>>.el-input__inner{
+    color:#606266 !important;
+  }
+
+  .el-select>>>.el-select__tags-text{
+    color:#606266 !important;
+  }
 </style>

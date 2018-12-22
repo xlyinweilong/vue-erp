@@ -11,6 +11,7 @@ import componentsRouter from './modules/components'
 import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
 import infoRouter from './modules/info'
+import billRouter from './modules/bill'
 import nestedRouter from './modules/nested'
 
 /** note: Submenu only appear when children.length>=1
@@ -85,6 +86,6 @@ export default new Router({
 })
 
 export const asyncRouterMap = [
-  infoRouter,
+  infoRouter, billRouter, nestedRouter,
   { path: '*', redirect: '/404', hidden: true }
 ]

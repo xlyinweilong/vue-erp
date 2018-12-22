@@ -13,10 +13,10 @@
     </div>
 
     <div class="filter-container">
-      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="createElement" plain :disabled="listLoading">新增</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="updateElement" plain :disabled="listLoading || selectedIds.length != 1">修改</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" plain :disabled="listLoading || selectedIds.length == 0">删除</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="getList" plain :disabled="listLoading || total ==  0">导出</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="createElement" :disabled="listLoading">新增</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="updateElement" :disabled="listLoading || selectedIds.length != 1">修改</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" :disabled="listLoading || selectedIds.length == 0">删除</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="getList" :disabled="listLoading || total ==  0">导出</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -34,14 +34,14 @@
           <span>{{ scope.row.code }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="名称" align="center">
+      <el-table-column label="名称" align="center" :fixed="showType === 3">
         <template slot-scope="scope">
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
       <el-table-column v-if="showType === 3" v-for="sizeGroup in sizeGroupTileList" :label="sizeGroup.name" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.sizeList[sizeGroup.index] }}</span>
+          <span v-text="scope.row.sizeList.length > sizeGroup.index ? scope.row.sizeList[sizeGroup.index].name : ''"></span>
         </template>
       </el-table-column>
     </el-table>
@@ -57,29 +57,24 @@
           <el-input v-model.trim="temp.name" @keyup.enter.native="saveData" />
         </el-form-item>
         <el-form-item v-if="showType == 3">
-          <el-button @click="addSize" type="primary" plain>新增尺码</el-button>
-          <el-button @click="moveUp" type="success" plain :disabled="selectedSizeRow == null || sizeList.indexOf(selectedSizeRow) <= 0">上移</el-button>
-          <el-button @click="moveDown" type="success" plain :disabled="selectedSizeRow == null || sizeList.indexOf(selectedSizeRow) < 0 || sizeList.indexOf(selectedSizeRow) === (sizeList.length - 1)">下移</el-button>
+          <el-button @click="addSize" type="primary">新增尺码</el-button>
+          <el-button @click="moveUp" type="success" :disabled="selectedSizeRow == null || sizeList.indexOf(selectedSizeRow) <= 0">上移</el-button>
+          <el-button @click="moveDown" type="success" :disabled="selectedSizeRow == null || sizeList.indexOf(selectedSizeRow) < 0 || sizeList.indexOf(selectedSizeRow) === (sizeList.length - 1)">下移</el-button>
         </el-form-item>
         <el-form-item v-if="showType == 3" @submit.native.prevent>
           <el-table :data="sizeList" row-key="id" border fit highlight-current-row style="width: 100%" @row-click="selectSizeRow">
             <el-table-column align="center" label="尺码">
               <template slot-scope="scope">
                 <template>
-                  <el-input placeholder="请输入尺码" v-model.trim="scope.row.value"  @keyup.enter.native="saveData"></el-input>
+                  <el-input placeholder="请输入尺码" v-model.trim="scope.row.name"  @keyup.enter.native="saveData"></el-input>
                 </template>
               </template>
             </el-table-column>
             <el-table-column align="center" label="删除" width="80">
               <template slot-scope="scope">
-                <el-button size="small" type="danger" icon="el-icon-delete" plain @click="removeSize(scope.row)"></el-button>
+                <el-button size="small" type="danger" icon="el-icon-delete" @click="removeSize(scope.row)"></el-button>
               </template>
             </el-table-column>
-            <!--<el-table-column align="center" label="拖拽" width="80">-->
-            <!--<template slot-scope="scope">-->
-            <!--<svg-icon class="drag-handler" icon-class="drag"/>-->
-            <!--</template>-->
-            <!--</el-table-column>-->
           </el-table>
         </el-form-item>
       </el-form>
@@ -209,7 +204,7 @@
         getDict({id: this.selectedIds[0].id}).then(response => {
           this.temp = response.data
           if (this.temp.sizeList != null) {
-            this.temp.sizeList.forEach(t => this.sizeList.push({value: t}))
+            this.sizeList = this.temp.sizeList;
           }
         })
       },
@@ -225,7 +220,7 @@
             this.temp.type2 = this.listQuery.type2;
             this.temp.sizeList = [];
             if (this.showType === 3) {
-              this.sizeList.filter(r => r.value != null && r.value != '').forEach(r => this.temp.sizeList.push(r.value))
+              this.sizeList.filter(r => r.name != null && r.name != '').forEach(r => this.temp.sizeList.push(r))
             }
             this.saving = true
             saveDict(this.temp).then(response => {
@@ -251,7 +246,7 @@
       },
       //新增尺码
       addSize() {
-        this.sizeList.push({value: ""});
+        this.sizeList.push({name: ""});
       },
       //删除尺码
       removeSize(row) {

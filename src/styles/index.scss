@@ -191,3 +191,10 @@ code {
 .multiselect--active {
   z-index: 1000 !important;
 }
+
+ .el-table .warning-row {
+   background: oldlace;
+ }
+.el-table .success-row {
+  background: #f0f9eb;
+}

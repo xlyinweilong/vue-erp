@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getList(params) {
   return request({
-    url: '/user/channel/list',
+    url: 'api/info/channel/list',
     method: 'get',
     params: params
   })
@@ -10,7 +10,7 @@ export function getList(params) {
 
 export function save(data) {
   return request({
-    url: '/user/channel/save',
+    url: 'api/info/channel/save',
     method: 'post',
     data
   })
@@ -18,7 +18,7 @@ export function save(data) {
 
 export function get(params) {
   return request({
-    url: '/user/channel/info',
+    url: 'api/info/channel/info',
     method: 'get',
     params: params
   })
@@ -26,7 +26,7 @@ export function get(params) {
 
 export function deleteEle(data) {
   return request({
-    url: '/user/channel/delete',
+    url: 'api/info/channel/delete',
     method: 'post',
     data
   })

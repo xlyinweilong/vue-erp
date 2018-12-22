@@ -6,10 +6,10 @@
       <el-button :loading="listLoading" class="filter-item" icon="el-icon-search" type="primary" @click="getList">查询</el-button>
     </div>
     <div class="filter-container">
-      <el-button class="filter-item" type="primary" icon="el-icon-plus" plain :disabled="listLoading" @click="$router.push({ path: '/info/supplier_create'})">新增</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" plain :disabled="listLoading || selectedIds.length != 1" @click="updateElement">修改</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" plain :disabled="listLoading || selectedIds.length == 0">删除</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="getList" plain :disabled="listLoading || total ==  0">导出</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-plus" :disabled="listLoading" @click="$router.push({ path: '/info/supplier_create'})">新增</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="listLoading || selectedIds.length != 1" @click="updateElement">修改</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" :disabled="listLoading || selectedIds.length == 0">删除</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="getList" :disabled="listLoading || total ==  0">导出</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -59,7 +59,7 @@
         selectedIds: [],
         list: null,
         total: 0,
-        listLoading: true,
+        listLoading: false,
       }
     },
     created() {
@@ -68,13 +68,15 @@
     methods: {
       //获取列表
       getList() {
-        this.listLoading = true
-        getList(this.listQuery).then(response => {
-          this.selectedIds = []
-          this.list = response.data.content
-          this.total = response.data.totalElements
-          this.listLoading = false
-        })
+        if(!this.listLoading){
+          this.listLoading = true
+          getList(this.listQuery).then(response => {
+            this.selectedIds = []
+            this.list = response.data.content
+            this.total = response.data.totalElements
+            this.listLoading = false
+          })
+        }
       },
       //选择
       selectionChange(val) {

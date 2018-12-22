@@ -6,7 +6,7 @@ export function loginByUsername(username, password) {
     password
   }
   return request({
-    url: '/user/login/login',
+    url: 'api/user/login/login',
     method: 'post',
     data
   })
@@ -14,16 +14,24 @@ export function loginByUsername(username, password) {
 
 export function logout() {
   return request({
-    url: '/user/login/logout',
+    url: 'api/user/login/logout',
     method: 'post'
   })
 }
 
 export function getUserInfo(token) {
   return request({
-    url: '/user/login/info',
+    url: 'api/user/login/info',
     method: 'get',
     params: { token }
+  })
+}
+
+export function keepAlive(params) {
+  return request({
+    url: 'api/user/login/keep_alive',
+    method: 'get',
+    params: params
   })
 }
 

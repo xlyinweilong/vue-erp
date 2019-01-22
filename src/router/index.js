@@ -7,12 +7,11 @@ Vue.use(Router)
 import Layout from '@/views/layout/Layout'
 
 /* Router Modules */
-import componentsRouter from './modules/components'
-import chartsRouter from './modules/charts'
-import tableRouter from './modules/table'
 import infoRouter from './modules/info'
 import billRouter from './modules/bill'
-import nestedRouter from './modules/nested'
+import userRouter from './modules/user'
+import configRouter from './modules/config'
+import posRouter from './modules/pos'
 
 /** note: Submenu only appear when children.length>=1
  *  detail see  https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -86,6 +85,6 @@ export default new Router({
 })
 
 export const asyncRouterMap = [
-  infoRouter, billRouter, nestedRouter,
+  infoRouter, billRouter, userRouter,configRouter,posRouter,
   { path: '*', redirect: '/404', hidden: true }
 ]

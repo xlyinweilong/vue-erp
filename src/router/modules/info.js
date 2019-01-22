@@ -6,24 +6,25 @@ import Layout from '@/views/layout/Layout'
 const infoRouter = {
   path: '/info',
   component: Layout,
-  redirect: '/info/base/goods',
+  redirect: '/info/base',
   name: 'Info',
   meta: {
     title: '资料中心',
-    icon: 'table'
+    icon: 'table',
+    power: 'info_'
   },
   children: [
     {
       path: 'base',
       component: () => import('@/z/info/base/index'),
       name: 'base',
-      meta: {title: '基本资料'}
+      meta: {title: '基本资料',power: 'info_base'}
     },
     {
       path: 'supplier',
       component: () => import('@/z/info/supplier/list'),
       name: 'supplier',
-      meta: {title: '供应商资料'}
+      meta: {title: '供应商资料',power: 'info_supplier'}
     },
     {
       path: 'supplier_create',
@@ -50,7 +51,7 @@ const infoRouter = {
       path: 'warehouse',
       component: () => import('@/z/info/warehouse/list'),
       name: 'warehouse',
-      meta: {title: '仓库资料'}
+      meta: {title: '仓库资料',power: 'info_warehouse'}
     },
     {
       path: 'warehouse_create',
@@ -77,7 +78,7 @@ const infoRouter = {
       path: 'channel',
       component: () => import('@/z/info/channel/list'),
       name: 'channel',
-      meta: {title: '渠道资料'}
+      meta: {title: '渠道资料',power: 'info_channel'}
     },
     {
       path: 'channel_create',
@@ -104,7 +105,7 @@ const infoRouter = {
       path: 'goods',
       component: () => import('@/z/info/goods/list'),
       name: 'goods',
-      meta: {title: '货品资料'}
+      meta: {title: '货品资料',power: 'info_goods'}
     },
     {
       path: 'goods_create',
@@ -131,12 +132,12 @@ const infoRouter = {
       path: 'barCode',
       component: () => import('@/z/info/barCode/list'),
       name: 'barCode',
-      meta: {title: '条形码资料'}
+      meta: {title: '条形码资料',power: 'info_barcode'}
     },
     {
       path: 'barCode_create',
       component: () => import('@/z/info/barCode/detail'),
-      name: 'employ_create',
+      name: 'barCode_create',
       hidden: true,
       meta: {title: '条形码资料-新增'}
     },
@@ -158,7 +159,7 @@ const infoRouter = {
       path: 'employ',
       component: () => import('@/z/info/employ/list'),
       name: 'employ',
-      meta: {title: '员工资料'}
+      meta: {title: '员工资料',power: 'info_employ'}
     },
     {
       path: 'employ_create',

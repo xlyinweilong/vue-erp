@@ -11,6 +11,7 @@ const user = {
     avatar: '',
     introduction: '',
     roles: [],
+    powers:[],
     setting: {
       articlePlatform: []
     }
@@ -40,6 +41,9 @@ const user = {
     },
     SET_ROLES: (state, roles) => {
       state.roles = roles
+    },
+    SET_POWER: (state, powers) => {
+      state.powers = powers
     }
   },
 
@@ -72,7 +76,7 @@ const user = {
           } else {
             reject('getInfo: roles must be a non-null array !')
           }
-
+          commit('SET_POWER', data.powers)
           commit('SET_NAME', data.name)
           commit('SET_AVATAR', data.avatar)
           commit('SET_INTRODUCTION', data.introduction)
@@ -82,20 +86,6 @@ const user = {
         })
       })
     },
-
-    // 第三方验证登录
-    // LoginByThirdparty({ commit, state }, code) {
-    //   return new Promise((resolve, reject) => {
-    //     commit('SET_CODE', code)
-    //     loginByThirdparty(state.status, state.email, state.code).then(response => {
-    //       commit('SET_TOKEN', response.data.token)
-    //       setToken(response.data.token)
-    //       resolve()
-    //     }).catch(error => {
-    //       reject(error)
-    //     })
-    //   })
-    // },
 
     // 登出
     LogOut({ commit, state }) {

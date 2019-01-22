@@ -13,10 +13,10 @@
     </div>
 
     <div class="filter-container">
-      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="createElement" :disabled="listLoading">新增</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="updateElement" :disabled="listLoading || selectedIds.length != 1">修改</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" :disabled="listLoading || selectedIds.length == 0">删除</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="getList" :disabled="listLoading || total ==  0">导出</el-button>
+      <el-button v-permission="'info_base_add'" class="filter-item" type="primary" icon="el-icon-plus" @click="createElement" :disabled="listLoading">新增</el-button>
+      <el-button v-permission="'info_base_edit'" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="updateElement" :disabled="listLoading || selectedIds.length != 1">修改</el-button>
+      <el-button v-permission="'info_base_delete'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" :disabled="listLoading || selectedIds.length == 0">删除</el-button>
+      <el-button v-permission="'info_base_export'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="getList" :disabled="listLoading || total ==  0">导出</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -90,10 +90,12 @@
 <script>
   import {getDictList, saveDict, getDict, deleteDict, getDictType} from '@/api/info/dict'
   import Pagination from '@/components/Pagination'
+  import permission from '@/directive/permission/index.js'
 
   export default {
     name: 'baseGoods',
     components: {Pagination},
+    directives: { permission },
     filters: {},
     data() {
       return {
@@ -226,7 +228,7 @@
             saveDict(this.temp).then(response => {
               this.saving = false
               this.dialogFormVisible = false
-              this.$message({message: response.message, type: 'success'});
+              this.$message({message: response.message, type: 'success'})
               this.getList()
             }).catch((err) => {
               this.saving = false
@@ -238,8 +240,7 @@
       deleteElement() {
         this.$confirm('确定要删除选中的数据吗?', '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
           deleteDict({ids: this.selectedIds.map(s => s.id), type1: this.listQuery.type1, type2: this.listQuery.type2}).then(response => {
-            this.dialogFormVisible = false
-            this.$message({message: response.message, type: 'success'});
+            this.$message({message: response.message, type: 'success'})
             this.getList()
           })
         })

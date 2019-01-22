@@ -2,6 +2,7 @@ import Cookies from 'js-cookie'
 
 const TokenKey = 'X-Token'
 
+
 export function getToken() {
   return Cookies.get(TokenKey)
 }

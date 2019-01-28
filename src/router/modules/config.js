@@ -19,6 +19,12 @@ const configRouter = {
       component: () => import('@/z/config/sysconfig/sysconfig'),
       name: 'sysconfig',
       meta: {title: '系统配置'}
+    },
+    {
+      path: 'payment',
+      component: () => import('@/z/config/sysconfig/sysconfig'),
+      name: 'payment',
+      meta: {title: '支付方式'}
     }
   ]
 }

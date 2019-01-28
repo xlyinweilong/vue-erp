@@ -15,6 +15,69 @@ const billRouter = {
   },
   children: [
     {
+      path: 'purchase ',
+      component: () => import('@/z/bill/index'),
+      name: 'purchase',
+      meta: {title: '采购管理',power: 'bill_warehouse_'},
+      redirect: '/bill/warehouse/supplier2warehouse',
+      children: [
+        {
+          path: 'purchase',
+          component: () => import('@/z/bill/supplier2warehouse/list'),
+          name: 'purchase',
+          meta: {title: '采购单', power: 'bill_warehouse_cjlh'}
+        },
+        {
+          path: 'purchase_create',
+          component: () => import('@/z/bill/supplier2warehouse/detail'),
+          name: 'purchase_create',
+          hidden: true,
+          meta: {title: '采购单-新增'}
+        },
+        {
+          path: 'purchase_update/:id',
+          component: () => import('@/z/bill/supplier2warehouse/detail'),
+          name: 'purchase_update',
+          hidden: true,
+          meta: {title: '采购单-修改'}
+        },
+        {
+          path: 'purchase_detail/:id',
+          component: () => import('@/z/bill/supplier2warehouse/info'),
+          name: 'purchase_info',
+          hidden: true,
+          meta: {title: '采购单-详情'}
+        },
+        {
+          path: 'delivery',
+          component: () => import('@/z/bill/warehouse2channel/list'),
+          name: 'delivery',
+          meta: {title: '配货单',power: 'bill_warehouse_ckch'}
+        },
+        {
+          path: 'delivery_create',
+          component: () => import('@/z/bill/warehouse2channel/detail'),
+          name: 'delivery_create',
+          hidden: true,
+          meta: {title: '配货单-新增'}
+        },
+        {
+          path: 'delivery_update/:id',
+          component: () => import('@/z/bill/warehouse2channel/detail'),
+          name: 'delivery_update',
+          hidden: true,
+          meta: {title: '配货单-修改'}
+        },
+        {
+          path: 'delivery_detail/:id',
+          component: () => import('@/z/bill/warehouse2channel/info'),
+          name: 'delivery_info',
+          hidden: true,
+          meta: {title: '配货单-详情'}
+        }
+      ]
+    },
+    {
       path: 'warehouse',
       component: () => import('@/z/bill/index'),
       name: 'Warehouse',

@@ -1,12 +1,13 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input placeholder="会员编号" v-model.trim="listQuery.searchKey" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
+      <el-input placeholder="代用卷编号" v-model.trim="listQuery.searchKey" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
       <el-button :loading="listLoading" class="filter-item" icon="el-icon-search" type="primary" @click="getList">查询</el-button>
     </div>
     <div class="filter-container">
       <el-button v-permission="'user_user_add'" class="filter-item" type="primary" icon="el-icon-plus" @click="createElement" :disabled="listLoading">新增</el-button>
-      <el-button v-permission="'user_user_delete'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" :disabled="listLoading || selectedIds.length == 0 || selectedIds.some(r => r.invalid)">失效</el-button>
+      <el-button v-permission="'user_user_edit'" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="updateElement" :disabled="listLoading || selectedIds.length != 1">修改</el-button>
+      <el-button v-permission="'user_user_delete'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" :disabled="listLoading || selectedIds.length == 0">删除</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -19,49 +20,44 @@
       border
     >
       <el-table-column type="selection" width="35"/>
-      <el-table-column label="会员编号" align="center">
+      <el-table-column label="编号" align="center">
         <template slot-scope="scope">
-          {{ scope.row.vipCode }}
+          {{ scope.row.code }}
         </template>
       </el-table-column>
-      <el-table-column label="会员名称" align="center">
+      <el-table-column label="生效时间" align="center">
         <template slot-scope="scope">
-          {{ scope.row.vipName }}
+          <span>{{ scope.row.startDate }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="充值时间" align="center">
+      <el-table-column label="失效时间" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.createDate }}</span>
+          <span>{{ scope.row.endDate }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="充值金额" align="center">
+      <el-table-column label="金额" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.balance }}</span>
+          <span>{{ scope.row.amount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="充值积分" align="center">
+      <el-table-column label="条件金额" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.integral }}</span>
+          <span>{{ scope.row.conditionAmount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="充值经验" align="center">
+      <el-table-column label="折扣" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.xp }}</span>
+          <span>{{ scope.row.discount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建人" align="center">
+      <el-table-column label="所属会员" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.createUserName }}</span>
+          <span>{{ scope.row.vipName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="是否失效" align="center">
+      <el-table-column label="已经使用" align="center">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.invalid ? 'danger':'success'" v-text="scope.row.invalid ? '失效':'有效'"></el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="失效人" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.invalidUserName }}</span>
+          <el-tag :type="scope.row.used ? 'waring':'success'" v-text="scope.row.used ? '已使用':'未使用'"></el-tag>
         </template>
       </el-table-column>
     </el-table>
@@ -69,7 +65,34 @@
 
 
     <el-dialog :title="dialogStatus==='create' ? '新增' : (temp.id == null ? '加载中...':'修改')" :visible.sync="dialogFormVisible">
-      <el-form ref="vipBalanceAddForm" :rules="rules" :model="temp" v-loading="saving || (dialogStatus !='create' && temp.id == null)">
+      <el-form ref="vipCouponForm" :rules="rules" :model="temp" v-loading="saving || (dialogStatus !='create' && temp.id == null)">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="类型" prop="type">
+              <el-select style="width: 100%" v-model="temp.type" placeholder="请选择">
+                <el-option label="抵金" value="AMOUNT"/>
+                <el-option label="折扣" value="DISCOUNT"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item :label="temp.type == 'AMOUNT' ? '金额':'折扣'" prop="amount">
+              <el-input-number :precision="2" style="width: 100%" v-model="temp.amount" :min="0" :max="99999999" label="输入数字" :step="temp.type == 'AMOUNT' ? 10 : 0.01" @keyup.enter.native="saveData"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="生效时间" prop="startDate">
+              <el-date-picker v-model="temp.startDate" style="width: 100%" type="datetime" placeholder="选择日期时间"></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="充值金额" prop="endDate">
+              <el-date-picker v-model="temp.endDate" style="width: 100%" type="datetime" placeholder="选择日期时间"></el-date-picker>
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="会员" prop="vipId">
@@ -77,20 +100,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="充值金额" prop="balance">
-              <el-input-number :precision="2" style="width: 100%" v-model="temp.balance" :min="0" :max="99999999" label="输入数字" :step="100" @keyup.enter.native="saveData"/>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="充值积分" prop="integral">
-              <el-input-number :precision="0" style="width: 100%" v-model="temp.integral" :min="0" :max="99999999" label="输入数字" :step="100" @keyup.enter.native="saveData"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="充值经验" prop="xp">
-              <el-input-number :precision="0" style="width: 100%" v-model="temp.xp" :min="0" :max="99999999" label="输入数字" :step="100" @keyup.enter.native="saveData"/>
+            <el-form-item label="条件金额" prop="conditionAmount">
+              <el-input-number :precision="2" style="width: 100%" v-model="temp.conditionAmount" :min="0" :max="99999999" label="输入数字" :step="100" @keyup.enter.native="saveData"/>
             </el-form-item>
           </el-col>
         </el-row>
@@ -104,14 +115,14 @@
 </template>
 
 <script>
-  import {getList, save, deleteEle} from '@/api/vip/vipBalanceAdd'
+  import {getList, save, deleteEle} from '@/api/vip/coupon'
   import Pagination from '@/components/Pagination'
   import permission from '@/directive/permission/index.js'
   import {initDate} from '@/z/bill/components/commonMethod'
   import vipSelect from '@/z/common/select/vipSelect'
 
   export default {
-    name: 'vip_info',
+    name: 'vip_coupon',
     components: {
       Pagination, vipSelect
     },
@@ -126,10 +137,9 @@
           searchKey: ''
         },
         rules: {
-          vipId: [{required: true, message: '必填字段', trigger: 'blur'}],
-          balance: [{required: true, message: '必填字段', trigger: 'blur'}],
-          integral: [{required: true, message: '必填字段', trigger: 'blur'}],
-          xp: [{required: true, message: '必填字段', trigger: 'blur'}]
+          type: [{required: true, message: '必填字段', trigger: 'blur'}],
+          amount: [{required: true, message: '必填字段', trigger: 'blur'}],
+          startDate: [{required: true, message: '必填字段', trigger: 'blur'}]
         },
         selectedIds: [],
         list: null,
@@ -162,25 +172,30 @@
       },
       //弹出框新增
       createElement() {
-        this.temp = {id: '', vipId: '', balance: 0, integral: 0, xp: 0}
+        this.temp = {id: '', vipId: '', type: 'AMOUNT', startDate: initDate(), conditionAmount: 0}
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
         this.$nextTick(() => {
-          this.$refs['vipBalanceAddForm'].clearValidate()
+          this.$refs['vipCouponForm'].clearValidate()
         })
       },
       //弹出框修改
       updateElement() {
         this.createElement()
+
         this.dialogStatus = 'update'
         this.temp = this.list.find(r => r.id === this.selectedIds[0].id)
+        if(this.temp.type == 'DISCOUNT'){
+          this.temp.amount = this.temp.discount
+          this.temp.discount = 0
+        }
       },
       saveData() {
-        this.$refs['vipBalanceAddForm'].validate((valid) => {
+        this.$refs['vipCouponForm'].validate((valid) => {
           if (valid) {
-            if (this.temp.balance == 0 && this.temp.integral == 0 && this.temp.xp == 0) {
-              this.$message.error('金额、积分、经验至少有一个大于0');
-              return
+            if(this.temp.type == 'DISCOUNT'){
+              this.temp.discount = this.temp.amount
+              this.temp.amount = 0
             }
             this.saving = true
             save(this.temp).then(response => {
@@ -193,7 +208,7 @@
       },
       //删除
       deleteElement() {
-        this.$confirm('确定要失效选中的数据吗?', '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
+        this.$confirm('确定要删除选中的数据吗?', '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
           deleteEle({ids: this.selectedIds.map(s => s.id)}).then(response => {
             this.$message({message: response.message, type: 'success'});
             this.getList()

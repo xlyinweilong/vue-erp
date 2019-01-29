@@ -41,9 +41,9 @@ const vipRouter = {
       meta: {title: '会员信息'}
     },
     {
-      path: 'voucher',
-      component: () => import('@/z/vip/grade/set_up_grade'),
-      name: 'voucher',
+      path: 'coupon',
+      component: () => import('@/z/vip/coupon/coupon'),
+      name: 'coupon',
       meta: {title: '代用卷'}
     },
     {
@@ -71,13 +71,13 @@ const vipRouter = {
           name: 'integral_add_goods',
           hidden: true,
           meta: {title: '积分增加规则-货品'}
+        },
+        {
+          path: 'integral_to_amount',
+          component: () => import('@/z/vip/integral/integral_to_amount'),
+          name: 'integral_plus',
+          meta: {title: '积分换算金额规则'}
         }
-        // {
-        //   path: 'integral_plus',
-        //   component: () => import('@/z/vip/integral/integral_plus'),
-        //   name: 'integral_plus',
-        //   meta: {title: '积分减少规则'}
-        // }
       ]
     },
     {
@@ -103,22 +103,29 @@ const vipRouter = {
     },
     {
       path: 'xp',
-      component: () => import('@/z/vip/integral/index'),
+      component: () => import('@/z/vip/xp/index'),
       name: 'xp',
       meta: {title: '会员经验'},
-      redirect: '/vip/integral/integral_add',
+      redirect: '/vip/xp/xp_add',
       children: [
         {
           path: 'xp_log',
-          component: () => import('@/z/vip/integral/integral_add'),
+          component: () => import('@/z/vip/xp/xp_add'),
           name: 'xp_log',
           meta: {title: '会员经验日志'}
         },
         {
           path: 'xp_add',
-          component: () => import('@/z/vip/integral/integral_add'),
+          component: () => import('@/z/vip/xp/xp_add'),
           name: 'xp_add',
           meta: {title: '经验增加规则'}
+        },
+        {
+          path: 'xp_add_goods/:id',
+          component: () => import('@/z/vip/xp/xp_add_goods'),
+          name: 'xp_add_goods',
+          hidden: true,
+          meta: {title: '积分增加规则-货品'}
         }
         // {
         //   path: 'xp_plus',

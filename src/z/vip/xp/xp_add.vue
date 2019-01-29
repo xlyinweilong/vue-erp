@@ -8,8 +8,6 @@
       <el-button v-permission="'user_user_add'" class="filter-item" type="primary" icon="el-icon-plus" @click="createElement" :disabled="listLoading">新增</el-button>
       <el-button v-permission="'user_user_edit'" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="updateElement" :disabled="listLoading || selectedIds.length != 1">修改</el-button>
       <el-button v-permission="'user_user_delete'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" :disabled="listLoading || selectedIds.length == 0">删除</el-button>
-      <el-button v-permission="'bill_channel_qddr_import'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-upload2" @click="importDialogVisible = true" :disabled="listLoading">导入</el-button>
-      <el-button v-permission="'bill_channel_qddr_export'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="exportDialogVisible = true" :disabled="listLoading || total ==  0">导出</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -22,68 +20,44 @@
       border
     >
       <el-table-column type="selection" width="35"/>
-      <el-table-column label="会员编号" align="center">
+      <el-table-column label="规则名称" align="center">
         <template slot-scope="scope">
-          <!--<router-link :to="'/bill/channel/channel2channel_in_detail/'+scope.row.id" class="link-type">-->
-            {{ scope.row.code }}
-          <!--</router-link>-->
-        </template>
-      </el-table-column>
-      <el-table-column label="会员姓名" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.name }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="会员性别" align="center">
-        <template slot-scope="scope">
-          <el-tag v-if="scope.row.sex == 0" type="warning">女</el-tag>
-          <el-tag v-if="scope.row.sex == 1" type="success">男</el-tag>
-          <el-tag v-if="scope.row.sex == -1" type="info">未知</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="开卡日期" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.openDate }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="开卡营业员编号" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.openEmployCode }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="开卡营业员姓名" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.openEmployName }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="开卡渠道编号" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.openChannelCode }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="开卡渠道名称" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.openChannelName }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="当前余额" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.balance }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="当前积分" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.integral }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="当前经验值" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.xpValue }}</span>
+          {{ scope.row.name }}
         </template>
       </el-table-column>
       <el-table-column label="会员等级" align="center">
         <template slot-scope="scope">
-          <el-tag type="success" v-text="gradeList.find(g => g.lowestXpValue <= scope.row.xpValue).name" />
+          <span v-text="scope.row.vipGradeId == null ? '':gradeList.find(r => r.id === scope.row.vipGradeId).name"></span>
+        </template>
+      </el-table-column>
+      <el-table-column label="生效时间" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.startDate }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="失效时间" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.endDate }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="每元增加经验" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.xp }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="优先级别" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.priority }}</span>
+        </template>
+      </el-table-column>
+      <!--<el-table-column label="设置渠道" align="center">-->
+        <!--<template slot-scope="scope">-->
+          <!--<el-button  v-permission="'user_role_power'" plain class="filter-item" type="primary" icon="el-icon-setting" @click="$router.push({ path: '/vip/xp/xp_add_goods/' + scope.row.id})">设置渠道</el-button>-->
+        <!--</template>-->
+      <!--</el-table-column>-->
+      <el-table-column label="设置货品" align="center">
+        <template slot-scope="scope">
+          <el-button  v-permission="'user_role_power'" plain class="filter-item" type="primary" icon="el-icon-setting" @click="$router.push({ path: '/vip/xp/xp_add_goods/' + scope.row.id})">设置货品</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -91,44 +65,46 @@
 
 
     <el-dialog :title="dialogStatus==='create' ? '新增' : (temp.id == null ? '加载中...':'修改')" :visible.sync="dialogFormVisible">
-      <el-form ref="vipForm" :rules="rules" :model="temp" v-loading="saving || (dialogStatus !='create' && temp.id == null)">
+      <el-form ref="vipXpRuleForm" :rules="rules" :model="temp" v-loading="saving || (dialogStatus !='create' && temp.id == null)">
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="编号/手机号" prop="code">
-              <el-input ref="vipCode" v-model.trim="temp.code" @keyup.enter.native="saveData"/>
+            <el-form-item label="规则名称" prop="name">
+              <el-input ref="vipRukeName" placeholder="输入名称" v-model.trim="temp.name" @keyup.enter.native="saveData"/>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="姓名" prop="name">
-              <el-input v-model.trim="temp.name" @keyup.enter.native="saveData"/>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="性别" prop="sex">
-              <el-select style="width: 100%" v-model="temp.sex" placeholder="请选择">
-                <el-option label="未知" :value="-1"/>
-                <el-option label="男" :value="1"/>
-                <el-option label="女" :value="0"/>
+            <el-form-item label="会员等级" prop="vipGradeId">
+              <el-select v-model="temp.vipGradeId" placeholder="请选择" style="width: 100%" filterable default-first-option>
+                <el-option v-for="item in gradeList" :label="item.name" :value="item.id"/>
               </el-select>
             </el-form-item>
           </el-col>
+        </el-row>
+        <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="发卡时间" prop="openDate">
-              <el-date-picker style="width: 100%" v-model="temp.openDate" type="date" format="yyyy-MM-dd" value-format="yyyy-MM-dd" placeholder="选择日期"/>
+            <el-form-item label="生效时间" prop="startDate">
+              <el-date-picker style="width: 100%" v-model="temp.startDate" type="datetime" format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间" @keyup.enter.native="saveData"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="失效时间" prop="endDate">
+              <el-date-picker style="width: 100%" v-model="temp.endDate" type="datetime" format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间" @keyup.enter.native="saveData"/>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="发卡营业员" prop="openEmployId">
-              <employSelect style="width: 100%" ref="openEmploy" :employId.sync="temp.openEmployId" :employCode.sync="temp.openEmployCode" :employName.sync="temp.openEmployName"/>
+            <el-form-item label="每元增加积分" prop="xp">
+              <template>
+                <el-input-number :precision="0" style="width: 100%" v-model="temp.xp" :min="0" :max="99999999" label="输入数字" :step="100" @keyup.enter.native="saveData"/>
+              </template>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="发卡渠道" prop="openChannelId">
-              <channelSelect style="width: 100%" ref="openChannel" :channelId.sync="temp.openChannelId" :channelCode.sync="temp.openChannelCode" :channelName.sync="temp.openChannelName"/>
+            <el-form-item label="优先级别" prop="priority">
+              <el-select v-model="temp.priority" placeholder="请选择" style="width: 100%" filterable default-first-option>
+                <el-option v-for="item in [0,1,2,3,4,5,6,7,8,9]" :label="item" :value="item"/>
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -142,7 +118,7 @@
 </template>
 
 <script>
-  import {getList, save, deleteEle} from '@/api/vip/vip'
+  import {getList, save, deleteEle} from '@/api/vip/vipXpUpRule'
   import {getList as getGradeList} from '@/api/vip/grade'
   import Pagination from '@/components/Pagination'
   import permission from '@/directive/permission/index.js'
@@ -166,7 +142,11 @@
           searchKey: ''
         },
         rules: {
-          code: [{required: true, message: '必填字段', trigger: 'blur'}],
+          name: [{required: true, message: '必填字段', trigger: 'blur'}],
+          vipGradeId: [{required: true, message: '必填字段', trigger: 'blur'}],
+          startDate: [{required: true, message: '必填字段', trigger: 'blur'}],
+          xp: [{required: true, message: '必填字段', trigger: 'blur'}],
+          priority: [{required: true, message: '必填字段', trigger: 'blur'}]
         },
         selectedIds: [],
         list: null,
@@ -182,13 +162,12 @@
     created() {
       this.listLoading = true
       getGradeList().then(response => {
-        this.gradeList = response.data.filter(r => r.indexDepth != null).sort((a, b) => a.indexDepth < b.indexDepth)
+        this.gradeList = response.data.filter(r => r.indexDepth != null).sort((a, b) => a.indexDepth > b.indexDepth)
         this.getList()
       }).catch(() => this.listLoading = false)
 
     },
     methods: {
-
       //获取列表
       getList() {
         this.listLoading = true
@@ -204,13 +183,16 @@
       },
       //弹出框新增
       createElement() {
-        this.temp = {id: '', name: '', sex: -1, openDate: initDate(), openChannelId: '', openEmployId: ''}
+        this.temp = {id: '', name: '', vipGradeId: '', startDate: initDate(), xp: 1, priority: 0}
+        if(this.gradeList.length > 0){
+          this.temp.vipGradeId = this.gradeList[0].id
+        }
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
         this.$nextTick(() => {
-          this.$refs['vipForm'].clearValidate()
+          this.$refs['vipXpRuleForm'].clearValidate()
         })
-        setTimeout(() => this.$refs.vipCode.$el.querySelector('input').focus(), 200)
+        setTimeout(() => this.$refs.vipRukeName.$el.querySelector('input').focus(), 200)
       },
       //弹出框修改
       updateElement() {
@@ -219,12 +201,16 @@
         this.temp = this.list.find(r => r.id === this.selectedIds[0].id)
       },
       saveData() {
-        this.saving = true
-        save(this.temp).then(response => {
-          this.dialogFormVisible = false
-          this.$message({message: response.message, type: 'success'});
-          this.getList()
-        }).finally(() => this.saving = false)
+        this.$refs['vipXpRuleForm'].validate((valid) => {
+          if (valid) {
+            this.saving = true
+            save(this.temp).then(response => {
+              this.dialogFormVisible = false
+              this.$message({message: response.message, type: 'success'});
+              this.getList()
+            }).finally(() => this.saving = false)
+          }
+        })
       },
       //删除
       deleteElement() {

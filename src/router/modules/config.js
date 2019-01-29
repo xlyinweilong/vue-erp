@@ -22,7 +22,7 @@ const configRouter = {
     },
     {
       path: 'payment',
-      component: () => import('@/z/config/sysconfig/sysconfig'),
+      component: () => import('@/z/config/payment'),
       name: 'payment',
       meta: {title: '支付方式'}
     }

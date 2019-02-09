@@ -38,7 +38,6 @@
           this.optionChannel.push({id: this.channelId, name: this.channelName, code: this.channelCode})
         }
       },
-      //搜索营业员
       searchChannel(query) {
         if (query !== '') {
           this.loadingChannel = true

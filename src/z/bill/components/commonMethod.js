@@ -10,6 +10,22 @@ export function initDate() {
   return (new Date().getFullYear() + '-' + month + '-' + day)
 }
 
+export function initDateTime() {
+  let hour = new Date().getHours()
+  if (hour < 10) {
+    hour = '0' + hour
+  }
+  let minute = new Date().getMinutes()
+  if (minute < 10) {
+    minute = '0' + minute
+  }
+  let second = new Date().getSeconds()
+  if (second < 10) {
+    second = '0' + second
+  }
+  return initDate() + ' ' + hour + ':' + minute + ':' + second
+}
+
 export function getPickerOptions() {
   return {
     disabledDate(time) {

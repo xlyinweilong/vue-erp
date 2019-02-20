@@ -1,7 +1,7 @@
 <template>
   <span>
     <el-form-item>
-      <el-select :disabled="isDetail" v-model="form.goodsId" filterable clearable remote default-first-option placeholder="请输入货号" :remote-method="searchGoods" @change="changeGoods" :loading="loadingGoods" style="width: 100%">
+      <el-select ref="selectGoods" :disabled="isDetail" v-model="form.goodsId" filterable clearable remote default-first-option placeholder="请输入货号" :remote-method="searchGoods" @change="changeGoods" :loading="loadingGoods" style="width: 100%">
         <i slot="prefix" class="el-input__icon el-icon-search"></i>
         <el-option v-for="item in optionGoods" :value="item.id" :label="item.code"/>
       </el-select>
@@ -50,6 +50,11 @@
       }
     },
     methods: {
+      init(){
+        this.form.goodsId = ''
+        this.form.goodsColorId = ''
+        this.form.goodsSizeId = ''
+      },
       selectOk(){
         this.form.goods.goodsColorId = this.form.goodsColorId
         this.form.goods.goodsColorCode = this.optionGoodsColor.find(r => r.colorId == this.form.goodsColorId).colorCode

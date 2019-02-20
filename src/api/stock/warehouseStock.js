@@ -16,3 +16,11 @@ export function stockList(params) {
   })
 }
 
+export function stockTotal(params) {
+  return request({
+    url: 'api/stock/warehouse/stock_total',
+    method: 'get',
+    params: params
+  })
+}
+

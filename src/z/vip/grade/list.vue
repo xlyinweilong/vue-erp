@@ -28,6 +28,11 @@
           {{ scope.row.name }}
         </template>
       </el-table-column>
+      <el-table-column label="折扣" align="center">
+        <template slot-scope="scope">
+          {{ scope.row.discount }}
+        </template>
+      </el-table-column>
       <el-table-column label="等级关系" align="center">
         <template slot-scope="scope">
           <el-tag :type="scope.row.indexDepth == null ? 'info': 'success'" v-text="scope.row.indexDepth == null ? '未设置' : '已设置'"></el-tag>
@@ -35,7 +40,7 @@
       </el-table-column>
       <el-table-column label="默认等级" align="center">
         <template slot-scope="scope">
-          <el-switch v-model="scope.row.defaultGrade" active-color="#13ce66" :disabled="scope.row.indexDepth == null || scope.row.defaultGrade" @change="setDefaultGrade(scope.row.id)" />
+          <el-switch v-model="scope.row.defaultGrade" active-color="#13ce66" :disabled="scope.row.indexDepth == null || scope.row.defaultGrade" @change="setDefaultGrade(scope.row.id)"/>
         </template>
       </el-table-column>
     </el-table>
@@ -44,6 +49,9 @@
       <el-form ref="gradeForm" :rules="rules" :model="temp" v-loading="saving || (dialogStatus !='create' && temp.id == null)">
         <el-form-item label="等级名称" prop="name">
           <el-input ref="gradeName" v-model.trim="temp.name" @keyup.enter.native="saveData"/>
+        </el-form-item>
+        <el-form-item label="折扣" prop="discount">
+          <el-input-number style="width: 100%" ref="gradeDiscount" v-model="temp.discount" :precision="2" :step="0.1" :min="0.01" :max="1" :controls="false" @keyup.enter.native="saveData"></el-input-number>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -75,10 +83,11 @@
         },
         rules: {
           name: [{required: true, message: '必填字段', trigger: 'blur'}],
+          discount: [{required: true, message: '必填字段', trigger: 'blur'}]
         },
         selectedIds: [],
         list: [],
-        dataList:[],
+        dataList: [],
         listLoading: false,
         temp: {},
         dialogStatus: '',
@@ -90,12 +99,12 @@
       this.getList()
     },
     methods: {
-      changeInput(){
+      changeInput() {
         this.dataList = this.list.filter(r => this.listQuery.searchKey == '' || r.name.indexOf(this.listQuery.searchKey) > -1)
       },
       setDefaultGrade(id) {
         this.listLoading = true
-        setDefaultGrade({id:id}).finally(() =>  this.getList())
+        setDefaultGrade({id: id}).finally(() => this.getList())
       },
       //获取列表
       getList() {
@@ -112,13 +121,14 @@
       },
       //弹出框新增
       createElement() {
-        this.temp = {id: '', name: ''}
+        this.temp = {id: '', name: '', discount: 1}
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
         this.$nextTick(() => {
           this.$refs['gradeForm'].clearValidate()
         })
-        setTimeout(() => this.$refs.gradeName.$el.querySelector('input').focus(), 200);
+        setTimeout(() => this.$refs.gradeName.$el.querySelector('input').focus(), 200)
+
       },
       //弹出框修改
       updateElement() {

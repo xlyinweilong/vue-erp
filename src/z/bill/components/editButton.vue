@@ -11,13 +11,14 @@
     props: {
       listLoading: {default: false},
       selectedIds: {default: []},
-      billType: {default: ''}
+      billType: {default: ''},
+      parentType: {default: 'channel'}
     },
     methods: {
       //修改
       updateElement() {
         let id = this.selectedIds[0].id
-        this.$router.push({path: '/bill/channel/' + this.billType + '_update/' + id});
+        this.$router.push({path: '/bill/'+this.parentType+'/' + this.billType + '_update/' + id});
       }
     }
   }

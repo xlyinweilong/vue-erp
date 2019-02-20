@@ -26,11 +26,11 @@
       </div>
     </transition>
     <div class="filter-container">
-      <add-button v-permission="'bill_channel_qdcgsh_add'" :list-loading.sync="listLoading" bill-type="channel2channel_in" parent-type="channel"/>
-      <edit-button v-permission="'bill_channel_qdcgsh_edit'" :list-loading.sync="listLoading" bill-type="channel2channel_in" :selected-ids="selectedIds"/>
+      <add-button v-permission="'bill_channel_qdcgsh_add'" :list-loading.sync="listLoading" bill-type="supplier2channel" parent-type="channel"/>
+      <edit-button v-permission="'bill_channel_qdcgsh_edit'" :list-loading.sync="listLoading" bill-type="supplier2channel" :selected-ids="selectedIds"/>
       <el-button v-permission="'bill_channel_qdcgsh_audit'" class="filter-item" style="margin-left: 10px;" type="warning" icon="el-icon-goods" @click="auditDialogVisible = true" :disabled="listLoading || selectedIds.length == 0 || selectedIds.filter(r => r.status != 'PENDING').length > 0">审核</el-button>
-      <el-button v-permission="'bill_channel_qdcgsh_unaudit'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-sold-out" @click="unAuditDialogVisible = true" :disabled="listLoading || selectedIds.length == 0 || selectedIds.filter(r => r.status != 'AUDITED' && r.status != 'COMPLETE').length > 0">反审核</el-button>
-      <delete-button v-permission="'bill_channel_qdcgsh_delete'" :list-loading.sync="listLoading" bill-type="channel2channel_in" :selected-ids="selectedIds" @get-list="getList"/>
+      <el-button v-permission="'bill_channel_qdcgsh_unaudit'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-sold-out" @click="unAuditDialogVisible = true" :disabled="listLoading || selectedIds.length == 0 || selectedIds.filter(r => r.status != 'AUDITED').length > 0">反审核</el-button>
+      <delete-button v-permission="'bill_channel_qdcgsh_delete'" :list-loading.sync="listLoading" bill-type="supplier2channel" :selected-ids="selectedIds" @get-list="getList"/>
       <el-button v-permission="'bill_channel_qdcgsh_import'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-upload2" @click="importDialogVisible = true" :disabled="listLoading">导入</el-button>
       <el-button v-permission="'bill_channel_qdcgsh_export'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="exportDialogVisible = true" :disabled="listLoading || total ==  0">导出</el-button>
     </div>

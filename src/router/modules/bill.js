@@ -15,7 +15,7 @@ const billRouter = {
   },
   children: [
     {
-      path: 'purchase ',
+      path: 'purchase',
       component: () => import('@/z/bill/index'),
       name: 'purchase',
       meta: {title: '采购管理',power: 'bill_warehouse_'},

@@ -19,8 +19,8 @@
     <transition name="el-zoom-in-top">
       <div class="filter-container" v-show="showSearchMore">
         <el-input placeholder="单据编号" v-model.trim="listQuery.code" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
-        <el-input placeholder="渠道编号" v-model.trim="listQuery.supplierCode" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
         <el-input placeholder="渠道编号" v-model.trim="listQuery.channelCode" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
+        <el-input placeholder="供应商编号" v-model.trim="listQuery.supplierCode" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
         <el-input placeholder="创建人" v-model.trim="listQuery.createUserName" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
         <el-input placeholder="审核人" v-model.trim="listQuery.auditUserName" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
       </div>
@@ -29,7 +29,7 @@
       <add-button v-permission="'bill_channel_qdcgth_add'" :list-loading.sync="listLoading" bill-type="channel2supplier"/>
       <edit-button v-permission="'bill_channel_qdcgth_edit'" :list-loading.sync="listLoading" bill-type="channel2supplier" :selected-ids="selectedIds"/>
       <el-button v-permission="'bill_channel_qdcgth_audit'" class="filter-item" style="margin-left: 10px;" type="warning" icon="el-icon-goods" @click="auditDialogVisible = true" :disabled="listLoading || selectedIds.length == 0 || selectedIds.filter(r => r.status != 'PENDING').length > 0">审核</el-button>
-      <el-button v-permission="'bill_channel_qdcgth_unaudit'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-sold-out" @click="unAuditDialogVisible = true" :disabled="listLoading || selectedIds.length == 0 || selectedIds.filter(r => r.status != 'AUDITED' && r.status != 'COMPLETE').length > 0">反审核</el-button>
+      <el-button v-permission="'bill_channel_qdcgth_unaudit'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-sold-out" @click="unAuditDialogVisible = true" :disabled="listLoading || selectedIds.length == 0 || selectedIds.filter(r => r.status != 'AUDITED').length > 0">反审核</el-button>
       <delete-button v-permission="'bill_channel_qdcgth_delete'" :list-loading.sync="listLoading" bill-type="channel2supplier" :selected-ids="selectedIds" @get-list="getList"/>
       <el-button v-permission="'bill_channel_qdcgth_import'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-upload2" @click="importDialogVisible = true" :disabled="listLoading">导入</el-button>
       <el-button v-permission="'bill_channel_qdcgth_export'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="exportDialogVisible = true" :disabled="listLoading || total ==  0">导出</el-button>

@@ -48,6 +48,7 @@
       </el-table-column>
       <el-table-column label="活动类型" align="center">
         <template slot-scope="scope">
+          <el-tag v-if="scope.row.type == 'PRICE_PROMOTION'">零售价促销</el-tag>
           <el-tag v-if="scope.row.type == 'BUY_DISCOUNT'">买满打折</el-tag>
           <el-tag v-if="scope.row.type == 'BUY_PLUS'">买满立减</el-tag>
           <el-tag v-if="scope.row.type == 'BUY_GIVE'">买满赠送</el-tag>

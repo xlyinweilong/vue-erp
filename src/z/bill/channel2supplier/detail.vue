@@ -26,17 +26,17 @@
 
               <el-col :span="6">
                 <el-form-item label="渠道" prop="channelId">
-                  <el-select :disabled="isDetail" v-model="form.channelId" filterable clearable remote default-first-option placeholder="请输入渠道编号" :loading="loadingOptionSupplierList" style="width: 100%" :remote-method="searchSupplierOption">
+                  <el-select :disabled="isDetail" v-model="form.channelId" filterable clearable remote default-first-option placeholder="请输入渠道编号" :loading="loadingOptionChannelList" style="width: 100%" :remote-method="searchChannelOption">
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
-                    <el-option v-for="item in optionSupplierList" :value="item.id" :label="item.name +'-'+item.code"/>
+                    <el-option v-for="item in optionChannelList" :value="item.id" :label="item.name +'-'+item.code"/>
                   </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="6">
                 <el-form-item label="供应商" prop="supplierId">
-                  <el-select :disabled="isDetail" v-model="form.supplierId" filterable clearable remote default-first-option placeholder="请输入渠道编号" :loading="loadingOptionChannelList" style="width: 100%" :remote-method="searchChannelOption">
+                  <el-select :disabled="isDetail" v-model="form.supplierId" filterable clearable remote default-first-option placeholder="请输入渠道编号" :loading="loadingOptionSupplierList" style="width: 100%" :remote-method="searchSupplierOption">
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
-                    <el-option v-for="item in optionChannelList" :value="item.id" :label="item.name +'-'+item.code"/>
+                    <el-option v-for="item in optionSupplierList" :value="item.id" :label="item.name +'-'+item.code"/>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -155,8 +155,8 @@
           if (this.form.status !== 'DRAFT') {
             this.form.status = 'PENDING'
           }
-          this.optionChannelList.push({id: this.form.supplierId, name: this.form.supplierName, code: this.form.supplierCode})
-          this.optionSupplierList.push({id: this.form.channelId, name: this.form.channelName, code: this.form.channelCode})
+          this.optionSupplierList.push({id: this.form.supplierId, name: this.form.supplierName, code: this.form.supplierCode})
+          this.optionChannelList.push({id: this.form.channelId, name: this.form.channelName, code: this.form.channelCode})
           response.data.goodsList.forEach(d => {
             d.optionGoodsList = []
             d.optionGoodsList.push({id: d.goodsId, name: d.goodsName, code: d.goodsCode})

@@ -151,7 +151,7 @@
           if (this.form.status !== 'DRAFT') {
             this.form.status = 'PENDING'
           }
-          this.optionParentBillList.push({id: this.form.parentBillId, code: this.form.parentBillCode})
+          this.optionParentBillList.push({id: this.form.parentBillId, code: this.form.parentBillCode,channelId:this.form.channelId,channelCode:this.form.channelCode,channelName:this.form.channelName,warehouseId:this.form.warehouseId,warehouseCode:this.form.warehouseCode,warehouseName:this.form.warehouseName})
           response.data.goodsList.forEach(d => {
             d.optionGoodsList = []
             d.optionGoodsList.push({id: d.goodsId, name: d.goodsName, code: d.goodsCode})
@@ -196,7 +196,7 @@
               this.$message({message: response.message, type: 'success'})
               let thisView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == this.$route.fullPath)
               this.$store.dispatch('delView', thisView).then(() => {
-                let backView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == "/bill/channel/inwarehouse")
+                let backView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == "/bill/warehouse/inwarehouse")
                 if (backView != null) {
                   this.$store.dispatch('delCachedView', backView).then(() => this.$nextTick(() => this.$router.replace({path: '/redirect' + backView.fullPath})))
                 }

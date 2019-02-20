@@ -35,6 +35,7 @@
 
 <script>
 
+  import {getList} from '@/api/vip/grade'
 
   export default {
     name: 'activity_vip_select',

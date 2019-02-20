@@ -151,7 +151,7 @@
           if (this.form.status !== 'DRAFT') {
             this.form.status = 'PENDING'
           }
-          this.optionParentBillList.push({id: this.form.parentBillId, code: this.form.parentBillCode})
+          this.optionParentBillList.push({id: this.form.parentBillId, code: this.form.parentBillCode,channelId:this.form.channelId,channelCode:this.form.channelCode,channelName:this.form.channelName,warehouseId:this.form.warehouseId,warehouseCode:this.form.warehouseCode,warehouseName:this.form.warehouseName})
           response.data.goodsList.forEach(d => {
             d.optionGoodsList = []
             d.optionGoodsList.push({id: d.goodsId, name: d.goodsName, code: d.goodsCode})

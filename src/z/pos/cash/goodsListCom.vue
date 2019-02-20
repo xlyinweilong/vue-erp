@@ -8,14 +8,21 @@
     empty-text="货品信息区域"
     border
   >
-    <el-table-column label="状态" align="center" fixed="left">
+    <el-table-column label="状态" align="center" fixed="left" width="80%">
       <template slot-scope="scope">
-        <span>{{statusMean(scope.row.cashStatus)}}</span>
+        <span>{{statusMean(scope.row)}}</span>
       </template>
     </el-table-column>
     <el-table-column label="货号" align="center" fixed="left">
       <template slot-scope="scope">
         <span>{{ scope.row.code }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column label="促销活动" align="center">
+      <template slot-scope="scope">
+        <el-select v-model="scope.row.activityId" placeholder="请选择" @change="doSetAllGoods">
+          <el-option v-for="item in scope.row.canJoinActivityList" :label="item.name" :value="item.id"/>
+        </el-select>
       </template>
     </el-table-column>
     <el-table-column v-if="diyValues.indexOf('goods_name') > -1" label="货品名称" align="center" width="200%">
@@ -45,12 +52,18 @@
     </el-table-column>
     <el-table-column v-if="diyValues.indexOf('bill_count') > -1" label="数量" align="center" width="50%">
       <template slot-scope="scope">
-        <span>{{ scope.row.billCount }}</span>
+        <el-input-number style="width: 100%;" v-model="scope.row.billCount" :precision="0" :step="1" :controls="false" @change="doSetAllGoods"></el-input-number>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('price') > -1" label="单价" align="center" width="70%">
+    <el-table-column v-if="diyValues.indexOf('price') > -1" label="折扣" align="center" width="70%">
       <template slot-scope="scope">
-        <span>{{ scope.row.price }}</span>
+        <el-input-number style="width: 100%;" v-model="scope.row.discount" :precision="2" :step="0.1" :min="0" :controls="false" @change="scope.row.price=scope.row.tagPrice*scope.row.discount;diyPrice(scope.row)"></el-input-number>
+        <!--<span>{{ scope.row.price/scope.row.tagPrice }}</span>-->
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('price') > -1" label="单价" align="center" width="120%">
+      <template slot-scope="scope">
+        <el-input-number style="width: 100%;" v-model="scope.row.price" :precision="2" :step="0.1" :min="0" :controls="false" @change="diyPrice(scope.row)"></el-input-number>
       </template>
     </el-table-column>
     <el-table-column v-if="diyValues.indexOf('amount') > -1" label="金额" align="center" width="95%">
@@ -60,10 +73,11 @@
     </el-table-column>
     <el-table-column v-if="diyValues.indexOf('employ') > -1" label="营业员" align="center" width="200%">
       <template slot-scope="scope">
-        <el-select v-model="scope.row.employId" filterable clearable remote default-first-option placeholder="请输入营业员" :remote-method="searchEmploy" @change="changeEmploy" :loading="loadingEmploy" style="width: 100%">
-        <i slot="prefix" class="el-input__icon el-icon-search"></i>
-        <el-option v-for="item in optionEmploy" :value="item.id" :label="item.code"/>
-      </el-select>
+        <el-select v-model="scope.row.employId" filterable clearable remote default-first-option placeholder="请输入营业员" :remote-method="searchEmploy" @change="changeEmploy(scope.row)" :loading="loadingEmploy" style="width: 100%">
+          <i slot="prefix" class="el-input__icon el-icon-search"></i>
+          <el-option v-for="item in optionEmploy" :value="item.id" :label="item.code"/>
+          <el-option v-if="scope.row.employId != '' && scope.row.employId != null && optionEmploy.every(e => e.id != scope.row.employId)" :value="scope.row.employId" :label="scope.row.employCode"/>
+        </el-select>
       </template>
     </el-table-column>
     <el-table-column v-if="diyValues.indexOf('stock_count') > -1" label="库存" align="center" width="50%">
@@ -78,7 +92,7 @@
     </el-table-column>
     <el-table-column label="操作" align="center" width="50%" fixed="right">
       <template slot-scope="scope">
-        <el-button type="text" @click="goodsList.splice(scope.$index,1)">删除</el-button>
+        <el-button type="text" @click="goodsList.splice(scope.$index,1);doSetAllGoods()">删除</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -86,6 +100,7 @@
 
 <script>
   import {getList as getEmployList} from '@/api/info/employ'
+  import {activityList} from '@/api/pos/pos'
 
   export default {
     computed: {},
@@ -96,23 +111,42 @@
       };
     },
     props: {
+      totalActivityList: {
+        default: []
+      },
       goodsList: {
         default: []
       },
       listLoading: {
         default: false
       },
-      lastEmployId: {
-        default: ''
+      lastEmploy: {
+        default: {}
       },
       diyValues: {
         default: []
       }
     },
+    watch: {},
     methods: {
-      statusMean(cashStatus) {
-        return cashStatus === 1 ? '销售' : '退货'
+      init() {
       },
+      //销售状态
+      statusMean(row) {
+        if (row.cashStatus === 1) {
+          let status = '销售'
+          if (row.vipDiscount != 1) {
+            status = '会员'
+          }
+          if (row.isDiyPrice) {
+            status = '手动改价'
+          }
+          return status
+        } else {
+          return '退货'
+        }
+      },
+      //查询员工
       searchEmploy(query) {
         if (query !== '') {
           this.loadingEmploy = true
@@ -123,10 +157,39 @@
           this.optionEmploy = []
         }
       },
-      changeEmploy(employId) {
-        this.goodsList.filter(g => g.employId == null || g.employId == '').forEach(g => g.employId = employId)
-        this.$emit('update:lastEmployId', employId)
+      //修改员工
+      changeEmploy(row) {
+        if (row.employId != null && row.employId != '') {
+          let employ = this.optionEmploy.find(e => e.id === row.employId)
+          row.employName = employ.name
+          row.employCode = employ.code
+          this.goodsList.filter(g => g.employId == null || g.employId == '').forEach(g => {
+            g.employId = row.employId
+            g.employName = row.employName
+            g.employCode = row.employCode
+          })
+          this.$emit('update:lastEmploy', {id: row.employId, name: row.employName, code: row.employCode})
+        } else {
+          row.employName = ''
+          row.employCode = ''
+        }
+      },
+      //自定义价格
+      diyPrice(row) {
+        row.isDiyPrice = true
+        row.isVipDiscount = false
+        row.vipDiscount = 1
+      },
+      doSetAllGoods(){
+        this.$emit('doSetAllGoods', "")
       }
     }
   }
 </script>
+
+<style scoped>
+  .el-input-number /deep/ .el-input__inner {
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+</style>

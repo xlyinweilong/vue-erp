@@ -7,9 +7,9 @@
       </el-select>
       <el-input :placeholder="listQuery.type == 'CHANNEL' ? '渠道编号' : '仓库编号'" v-model.trim="listQuery.code" style="width: 200px;" @keyup.enter.native="getList"/>
       <el-input placeholder="货号" v-model.trim="listQuery.goodsCode" style="width: 200px;" @keyup.enter.native="getList"/>
-      <el-input placeholder="颜色编号" v-model.trim="listQuery.goodsColorCode" style="width: 100px;"  @keyup.enter.native="getList"/>
-      <el-input placeholder="颜色名称" v-model.trim="listQuery.goodsColorName" style="width: 100px;"  @keyup.enter.native="getList"/>
-      <el-input placeholder="尺码" v-model.trim="listQuery.goodsSizeName" style="width: 100px;"  @keyup.enter.native="getList"/>
+      <el-input placeholder="颜色编号" v-model.trim="listQuery.goodsColorCode" style="width: 100px;" @keyup.enter.native="getList"/>
+      <el-input placeholder="颜色名称" v-model.trim="listQuery.goodsColorName" style="width: 100px;" @keyup.enter.native="getList"/>
+      <el-input placeholder="尺码" v-model.trim="listQuery.goodsSizeName" style="width: 100px;" @keyup.enter.native="getList"/>
       <el-button :loading="listLoading" icon="el-icon-search" type="primary" @click="getList">查询</el-button>
     </div>
     <el-table
@@ -18,6 +18,8 @@
       tooltip-effect="dark"
       style="width: 100%"
       border
+      :summary-method="getSummaries"
+      show-summary
     >
       <el-table-column label="仓库编号" align="center" v-if="listQuery.type == 'WAREHOUSE'">
         <template slot-scope="scope">
@@ -70,8 +72,8 @@
 </template>
 
 <script>
-  import {stockList as channelStockList} from '@/api/stock/channelStock'
-  import {stockList as warehouseStockList} from '@/api/stock/warehouseStock'
+  import {stockList as channelStockList, stockTotal as channelStockTotal} from '@/api/stock/channelStock'
+  import {stockList as warehouseStockList, stockTotal as warehouseStockTotal} from '@/api/stock/warehouseStock'
   import Pagination from '@/components/Pagination'
 
   export default {
@@ -81,6 +83,9 @@
     },
     data() {
       return {
+        totalStock: {
+          stockCount: ''
+        },
         total: 0,
         listQuery: {
           type: 'CHANNEL',
@@ -104,10 +109,29 @@
         this.listLoading = true
         this.listQuery.warehouseCode = this.listQuery.channelCode = this.listQuery.code
         let fun = (this.listQuery.type == 'CHANNEL' ? channelStockList : warehouseStockList)
+        let funTotal = (this.listQuery.type == 'CHANNEL' ? channelStockTotal : warehouseStockTotal)
         fun(this.listQuery).then(response => {
           this.stockList = response.data.content
           this.total = response.data.totalElements
         }).finally(() => this.listLoading = false)
+        funTotal(this.listQuery).then(response => {
+          this.totalStock.stockCount = response.data
+        }).finally()
+      },
+      getSummaries(param) {
+        const { columns, data } = param;
+        const sums = [];
+        columns.forEach((column, index) => {
+          if (index === 0) {
+            sums[index] = '多页总计';
+            return;
+          }
+          if (index + 1 === columns.length) {
+            sums[index] = this.totalStock.stockCount;
+            return;
+          }
+        });
+        return sums;
       }
     }
   }

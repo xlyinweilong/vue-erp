@@ -17,7 +17,7 @@
         <el-table-column label="渠道编号" align="center" min-width="250">
           <template slot-scope="scope">
             <el-select style="width: 100%" v-model="scope.row.channelId" filterable clearable remote
-                       default-first-option placeholder="请输入渠道编号" :remote-method="searchChannel" @change="changeSelect"
+                       default-first-option placeholder="请输入渠道" :remote-method="searchChannel" @change="changeSelect"
                        :loading="loadingChannel" @focus="focusSelect(scope.row)">
               <i slot="prefix" class="el-input__icon el-icon-search"></i>
               <el-option v-if="scope.row.channelId != '' && scope.row.optionChannel == null" :value="scope.row.channelId" :label="scope.row.channelName +'-'+scope.row.channelCode"/>

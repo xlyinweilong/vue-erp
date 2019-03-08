@@ -23,9 +23,12 @@
                   <el-date-picker class="full_with_date" v-model="form.billDate" type="date" format="yyyy-MM-dd" value-format="yyyy-MM-dd" placeholder="选择日期" :picker-options="pickerOptions"/>
                 </el-form-item>
               </el-col>
-
+              <el-col :span="6">
+                <el-form-item label="手工单号" prop="manualCode">
+                  <el-input v-model="form.manualCode" clearable/>
+                </el-form-item>
+              </el-col>
             </el-row>
-
             <el-row :gutter="20">
               <el-col :span="6">
                 <el-form-item label="渠道调出" prop="parentBillId">
@@ -47,8 +50,11 @@
               </el-col>
             </el-row>
           </el-tab-pane>
-          <el-tab-pane label="货品信息" name="GOODS">
-            <detail-goods ref="detailGoods" :list-loading="listLoading" :list.sync="list"/>
+          <el-tab-pane label="货品信息" name="GOODS" :disabled="form.toChannelId == ''">
+            <detail-goods ref="detailGoods" :list-loading="listLoading" :list.sync="list" :hasParent="true" :parentList="parentList" :channelId="form.toChannelId" :parentTypeName="'渠道调出'"/>
+          </el-tab-pane>
+          <el-tab-pane label="差异数" name="DIFF" :disabled="form.parentBillId == ''">
+            <diff-goods ref="diffGoods" :list-loading="listLoading" :list.sync="list" :parentList="parentList"/>
           </el-tab-pane>
         </el-tabs>
       </el-form>
@@ -63,13 +69,14 @@
   import Sticky from '@/components/Sticky'
   import {save, get, getParentBill, getParentBillGoods} from '@/api/bill/channel2channelIn'
   import detailGoods from '@/z/bill/components/detailGoods'
+  import diffGoods from '@/z/bill/components/diffGoods'
   import {initDate,getPickerOptions} from '@/z/bill/components/commonMethod'
-
+  import {backUrl} from '@/z/common/commonMethod'
 
   export default {
     name: 'channel2channel_in_detail',
     components: {
-      Sticky, detailGoods
+      Sticky, detailGoods,diffGoods
     },
     data() {
       return {
@@ -79,7 +86,8 @@
           parentBillId: '',
           billDate: initDate(),
           code: '',
-          status: 'PENDING'
+          status: 'PENDING',
+          manualCode:''
         },
         //明细列表
         list: [],
@@ -94,6 +102,7 @@
         //搜索上游单据
         loadingOptionParentBillList: false,
         optionParentBillList: [],
+        parentList:[]
       }
     },
     created() {
@@ -101,7 +110,6 @@
       if (id != null) {
         this.loading = true
         get({id: id}).then(response => {
-          this.loading = false
           this.form = response.data
           if (this.form.status !== 'DRAFT') {
             this.form.status = 'PENDING'
@@ -111,11 +119,10 @@
             channelName: this.form.channelName, channelCode: this.form.channelCode, channelId: this.form.channelId
             , toChannelName: this.form.toChannelName, toChannelCode: this.form.toChannelCode, toChannelId: this.form.toChannelId
           })
-          response.data.goodsList.forEach(d => {
-            d.optionGoodsList = []
-            d.optionGoodsList.push({id: d.goodsId, name: d.goodsName, code: d.goodsCode})
-          })
           this.list = response.data.goodsList
+          getParentBillGoods({id: this.form.parentBillId}).then(response => {
+            this.parentList = response.data
+          }).finally(() => this.loading = false)
         }).catch(() => this.loading = false)
       }
     },
@@ -124,6 +131,8 @@
       handleTagPaneClick(tab, event) {
         if (tab.name === 'GOODS') {
           this.$refs.detailGoods.initFocus()
+        }else if (tab.name === 'DIFF') {
+          this.$refs.diffGoods.init()
         }
       },
       //保存
@@ -151,13 +160,7 @@
             save(this.form).then(response => {
               this.loading = false
               this.$message({message: response.message, type: 'success'})
-              let thisView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == this.$route.fullPath)
-              this.$store.dispatch('delView', thisView).then(() => {
-                let backView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == "/bill/channel/channel2channel_in")
-                if (backView != null) {
-                  this.$store.dispatch('delCachedView', backView).then(() => this.$nextTick(() => this.$router.replace({path: '/redirect' + backView.fullPath})))
-                }
-              })
+              backUrl(this, '/bill/channel/channel2channel_in')
             }).catch((err) => this.loading = false)
           } else {
             this.activeName = 'BASE'
@@ -190,13 +193,10 @@
           this.form.toChannelCode = ele.toChannelCode
           this.loading = true
           getParentBillGoods({id: id}).then(response => {
-            response.data.forEach(d => {
-              d.optionGoodsList = []
-              d.optionGoodsList.push({id: d.goodsId, name: d.goodsName, code: d.goodsCode})
-            })
-            this.loading = false
+            this.parentList = JSON.parse(JSON.stringify(response.data))
             this.list = response.data
-          })
+            this.list.forEach(g => g.detail.forEach(s => s.billCount = ''))
+          }).finally(() => this.loading = false)
         }
       }
 

@@ -57,3 +57,19 @@ export function exportEle(data) {
   })
 }
 
+export function getParentBill(params) {
+  return request({
+    url: 'api/bill/supplier2warehouse/parent_bill',
+    method: 'get',
+    params: params
+  })
+}
+
+export function getParentBillGoods(params) {
+  return request({
+    url: 'api/bill/supplier2warehouse/parent_bill_goods',
+    method: 'get',
+    params: params
+  })
+}
+

@@ -202,7 +202,7 @@
         exportDialogType: 'BASE',
         //导入
         importDialogVisible: false,
-        importAction: process.env.BASE_API + '/info/goods/upload_goods',
+        importAction: process.env.BASE_API + '/api/info/goods/upload_goods',
         importFileList: [],
         importHeaders: {'X-Token': getToken()},
         importStatus: {totalRowCount: 0, nowRowCount: 0, status: -2},
@@ -250,7 +250,7 @@
       },
       //下载模板
       downloadTemplate() {
-        window.open(process.env.BASE_API + "/download/goods/goods.xlsx")
+        window.open(process.env.BASE_API + "/static/download/goods/goods.xlsx")
       },
       showImport() {
         this.importFileList = []
@@ -282,9 +282,9 @@
             setTimeout(() => this.importDialogVisible = false, 3000)
           } else if (data.status === -1) {
             this.importUseTime.useTime = (new Date().getTime() - this.importUseTime.start.getTime()) / 1000
-            this.errorMsg("上传失败，请查看错误文件")
+            this.$message.error("上传失败，请查看错误文件")
           } else {
-            this.errorMsg("系统异常")
+            this.$message.error("系统异常")
           }
         })
       },
@@ -294,7 +294,7 @@
         this.importFileList = []
       },
       downloadImportErrorFile() {
-        window.open(process.env.BASE_API + "/bill/supplier2warehouse/download_template")
+        window.open(process.env.BASE_API + "/download/" + getToken() + ".xlsx")
       }
     }
   }

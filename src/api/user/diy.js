@@ -1,8 +1,8 @@
 import request from '@/utils/request'
 
-export function get(params) {
+export function getList(params) {
   return request({
-    url: 'api/pos/sale_diy/list',
+    url: 'api/user/diy/list',
     method: 'get',
     params: params
   })
@@ -10,7 +10,7 @@ export function get(params) {
 
 export function save(data) {
   return request({
-    url: 'api/pos/sale_diy/save',
+    url: 'api/user/diy/save',
     method: 'post',
     data
   })

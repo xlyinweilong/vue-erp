@@ -14,6 +14,7 @@ import configRouter from './modules/config'
 import posRouter from './modules/pos'
 import vipRouter from './modules/vip'
 import activityRouter from './modules/activity'
+import diyRouter from './modules/diy'
 
 /** note: Submenu only appear when children.length>=1
  *  detail see  https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -87,6 +88,6 @@ export default new Router({
 })
 
 export const asyncRouterMap = [
-  infoRouter, billRouter, vipRouter, activityRouter,posRouter, userRouter, configRouter,
+  infoRouter, billRouter, vipRouter, activityRouter,posRouter, userRouter, configRouter,diyRouter,
   {path: '*', redirect: '/404', hidden: true}
 ]

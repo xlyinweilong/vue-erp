@@ -1,5 +1,5 @@
 <template>
-  <el-select :disable="isDisabled" v-model="tempChannelId" filterable clearable remote default-first-option placeholder="请输入渠道编号" :remote-method="searchChannel" :loading="loadingChannel" @change="changeSelect">
+  <el-select :disable="isDisabled" v-model="tempChannelId" filterable clearable remote default-first-option placeholder="请输入渠道" :remote-method="searchChannel" :loading="loadingChannel" @change="changeSelect">
     <i slot="prefix" class="el-input__icon el-icon-search"></i>
     <el-option v-for="item in optionChannel" :value="item.id" :label="item.name +'-'+item.code"/>
   </el-select>

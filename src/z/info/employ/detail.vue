@@ -33,6 +33,7 @@
 <script>
   import {save, get} from '@/api/info/employ'
   import Sticky from '@/components/Sticky'
+  import {backUrl} from '@/z/common/commonMethod'
 
   export default {
     name: 'employ_detail',
@@ -72,13 +73,7 @@
             save(this.form).then(response => {
               this.loading = false
               this.$message({message: response.message, type: 'success'})
-              let thisView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == this.$route.fullPath)
-              this.$store.dispatch('delView', thisView).then(() => {
-                let backView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == "/info/employ")
-                if (backView != null) {
-                  this.$store.dispatch('delCachedView', backView).then(() => this.$nextTick(() => this.$router.replace({path: '/redirect' + backView.fullPath})))
-                }
-              })
+              backUrl(this, '/info/employ')
             }).catch((err) => this.loading = false)
           }
         })

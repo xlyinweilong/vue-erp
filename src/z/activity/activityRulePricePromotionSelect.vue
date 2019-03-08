@@ -22,7 +22,7 @@
             <goodsSelect style="width: 100%" :goodsId.sync="scope.row.goodsId" :goodsCode.sync="scope.row.goodsCode" :goodsName.sync="scope.row.goodsName"></goodsSelect>
           </template>
         </el-table-column>
-        <!--<el-table-column label="标准吊盘价" align="center" min-width="250">-->
+        <!--<el-table-column label="标准吊牌价" align="center" min-width="250">-->
         <!--<template slot-scope="scope">-->
         <!--<span>{{}}</span>-->
         <!--</template>-->

@@ -16,6 +16,7 @@
   import Kanban from '@/components/Kanban'
   import {getList,setGrade} from '@/api/vip/grade'
   import Sticky from '@/components/Sticky'
+  import {backUrl} from '@/z/common/commonMethod'
 
   export default {
     name: 'set_grade',
@@ -42,13 +43,7 @@
         this.loading = true
         setGrade(this.list2).then(response => {
           this.$message({message: response.message, type: 'success'})
-          let thisView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == this.$route.fullPath)
-          this.$store.dispatch('delView', thisView).then(() => {
-            let backView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == "/vip/grade/list")
-            if (backView != null) {
-              this.$store.dispatch('delCachedView', backView).then(() => this.$nextTick(() => this.$router.replace({path: '/redirect' + backView.fullPath})))
-            }
-          })
+          backUrl(this, '/vip/grade/list')
         }).finally(() => this.loading = false)
       }
     }

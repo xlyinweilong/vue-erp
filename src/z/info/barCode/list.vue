@@ -9,7 +9,8 @@
       <el-button v-permission="'info_barcode_add'" class="filter-item" type="primary" icon="el-icon-plus" :disabled="listLoading" @click="$router.push({ path: '/info/barCode_create'})">新增</el-button>
       <el-button v-permission="'info_barcode_edit'" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="listLoading || selectedIds.length != 1" @click="updateElement">修改</el-button>
       <el-button v-permission="'info_barcode_delete'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" :disabled="listLoading || selectedIds.length == 0">删除</el-button>
-      <el-button v-permission="'info_barcode_export'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="getList" :disabled="listLoading || total ==  0">导出</el-button>
+      <el-button v-permission="'info_barcode_import'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-upload2" @click="importDialogVisible=true" :disabled="listLoading">导入</el-button>
+      <!--<el-button v-permission="'info_barcode_export'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="getList" :disabled="listLoading || total ==  0">导出</el-button>-->
     </div>
     <el-table
       v-loading="listLoading"
@@ -56,6 +57,8 @@
       </el-table-column>
     </el-table>
     <pagination v-show="total>0 && !listLoading" :total="total" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.pageSize" @pagination="getList"/>
+
+    <commonUpload :show.sync="importDialogVisible" :downloadTemplateUrl="'/static/download/barCode/barCode.xlsx'" :importAction="importAction"/>
   </div>
 </template>
 
@@ -63,11 +66,12 @@
   import {getList, deleteEle} from '@/api/info/barCode'
   import Pagination from '@/components/Pagination'
   import permission from '@/directive/permission/index.js'
+  import commonUpload from '@/z/common/upload/commonUpload'
 
   export default {
     name: 'barCode',
-    components: {Pagination},
-    directives: { permission },
+    components: {Pagination, commonUpload},
+    directives: {permission},
     filters: {},
     data() {
       return {
@@ -82,6 +86,8 @@
         list: null,
         total: 0,
         listLoading: true,
+        importDialogVisible:false,
+        importAction: process.env.BASE_API + '/api/info/goods/upload_goods',
       }
     },
     created() {

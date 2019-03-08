@@ -19,20 +19,20 @@
     <transition name="el-zoom-in-top">
       <div class="filter-container" v-show="showSearchMore">
         <el-input placeholder="单据编号" v-model.trim="listQuery.code" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
-        <el-input placeholder="调出渠道编号" v-model.trim="listQuery.channelCode" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
-        <el-input placeholder="调入渠道编号" v-model.trim="listQuery.toChannelCode" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
+        <el-input placeholder="渠道编号" v-model.trim="listQuery.channelCode" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
         <el-input placeholder="创建人" v-model.trim="listQuery.createUserName" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
         <el-input placeholder="审核人" v-model.trim="listQuery.auditUserName" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
       </div>
     </transition>
     <div class="filter-container">
-      <add-button v-permission="'bill_channel_qdpd_add'" :list-loading.sync="listLoading" bill-type="channel2channel_in"/>
-      <edit-button v-permission="'bill_channel_qdpd_edit'" :list-loading.sync="listLoading" bill-type="channel2channel_in" :selected-ids="selectedIds"/>
+      <add-button v-permission="'bill_channel_qdpd_add'" :list-loading.sync="listLoading" bill-type="channel_inventory"/>
+      <edit-button v-permission="'bill_channel_qdpd_edit'" :list-loading.sync="listLoading" bill-type="channel_inventory" :selected-ids="selectedIds"/>
       <el-button v-permission="'bill_channel_qdpd_audit'" class="filter-item" style="margin-left: 10px;" type="warning" icon="el-icon-goods" @click="auditDialogVisible = true" :disabled="listLoading || selectedIds.length == 0 || selectedIds.filter(r => r.status != 'PENDING').length > 0">审核</el-button>
       <el-button v-permission="'bill_channel_qdpd_unaudit'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-sold-out" @click="unAuditDialogVisible = true" :disabled="listLoading || selectedIds.length == 0 || selectedIds.filter(r => r.status != 'AUDITED').length > 0">反审核</el-button>
-      <delete-button v-permission="'bill_channel_qdpd_delete'" :list-loading.sync="listLoading" bill-type="channel2channel_in" :selected-ids="selectedIds" @get-list="getList"/>
+      <delete-button v-permission="'bill_channel_qdpd_delete'" :list-loading.sync="listLoading" bill-type="channel_inventory" :selected-ids="selectedIds" @get-list="getList"/>
       <el-button v-permission="'bill_channel_qdpd_import'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-upload2" @click="importDialogVisible = true" :disabled="listLoading">导入</el-button>
       <el-button v-permission="'bill_channel_qdpd_export'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="exportDialogVisible = true" :disabled="listLoading || total ==  0">导出</el-button>
+      <el-button v-permission="'bill_channel_qdpd_pd'" class="filter-item" style="margin-left: 10px;" type="warning" icon="el-icon-edit-outline" @click="inventoryDialogVisible = true" :disabled="listLoading || total ==  0">盘点</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -45,54 +45,64 @@
       border
     >
       <el-table-column type="selection" width="35"/>
-      <el-table-column label="单据编号" align="center" width="300%">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('bill_code') > -1" label="单据编号" align="center" width="300%">
         <template slot-scope="scope">
           <router-link :to="'/bill/channel/channel_inventory_detail/'+scope.row.id" class="link-type">
             {{ scope.row.code }}
           </router-link>
         </template>
       </el-table-column>
-      <el-table-column label="单据时间" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('bill_date') > -1" label="单据时间" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.billDate }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="渠道编号" align="center">
+      <el-table-column v-if="diyValues.indexOf('create_date') > -1" label="创建时间" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.createDate }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="diyValues.indexOf('update_date') > -1" label="更新时间" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.updateDate }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('channel_code') > -1" label="渠道编号" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.channelCode }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="渠道名称" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('channel_name') > -1" label="渠道名称" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.channelName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="总数量" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('total_count') > -1" label="总数量" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.totalCount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="总金额" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('total_amount') > -1" label="总金额" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.totalAmount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="总吊牌价" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('total_tag_amount') > -1" label="总吊牌额" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.totalTagAmount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建人" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('create_user_name') > -1" label="创建人" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.createUserName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="审核人" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('audit_user_name') > -1" label="审核人" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.auditUserName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('status') > -1" label="状态" align="center">
         <template slot-scope="scope">
           <span><el-tag :type="getStatusTag(scope.row.status)">{{ scope.row.statusMean }}</el-tag></span>
         </template>
@@ -106,7 +116,9 @@
 
     <export-dialog :show.sync="exportDialogVisible" bill-type="channel_inventory"/>
 
-    <import-dialog :show.sync="importDialogVisible" bill-type="channel_inventory" bill-key="c2s" @get-list="getList"/>
+    <import-dialog :show.sync="importDialogVisible" bill-type="channel_inventory" bill-key="ci" @get-list="getList"/>
+
+    <inventory-dialog :show.sync="inventoryDialogVisible" bill-type="channel_inventory" @get-list="getList"/>
 
   </div>
 </template>
@@ -122,11 +134,13 @@
   import editButton from '@/z/bill/components/editButton'
   import addButton from '@/z/bill/components/addButton'
   import permission from '@/directive/permission/index.js'
+  import inventoryDialog from '@/z/bill/components/inventoryDialog'
+  import {getList as getDiy} from '@/api/user/diy'
 
   export default {
     name: 'channel_inventory',
     components: {
-      Pagination, auditDialog, unAuditDialog, exportDialog, importDialog, deleteButton, editButton, addButton
+      Pagination, auditDialog, unAuditDialog, exportDialog, importDialog, deleteButton, editButton, addButton,inventoryDialog
     },
     directives: { permission },
     filters: {},
@@ -157,10 +171,15 @@
         //导出
         exportDialogVisible: false,
         //导入
-        importDialogVisible: false
+        importDialogVisible: false,
+        //盘点
+        inventoryDialogVisible:false,
+        //偏好
+        diyValues: []
       }
     },
     created() {
+      getDiy({type: 'BILL_LIST'}).then(response => this.diyValues = response.data)
       this.getList()
     },
     methods: {

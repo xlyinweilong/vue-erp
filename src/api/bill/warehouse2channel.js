@@ -57,3 +57,35 @@ export function exportEle(data) {
   })
 }
 
+export function getParentBill(params) {
+  return request({
+    url: 'api/bill/warehouse2channel/parent_bill',
+    method: 'get',
+    params: params
+  })
+}
+
+export function getParentBillGoods(params) {
+  return request({
+    url: 'api/bill/warehouse2channel/parent_bill_goods',
+    method: 'get',
+    params: params
+  })
+}
+
+export function getGrandParentBill(params) {
+  return request({
+    url: 'api/bill/warehouse2channel/grand_parent_bill',
+    method: 'get',
+    params: params
+  })
+}
+
+export function getGrandParentBillGoods(params) {
+  return request({
+    url: 'api/bill/warehouse2channel/grand_parent_bill_goods',
+    method: 'get',
+    params: params
+  })
+}
+

@@ -19,8 +19,7 @@
     <transition name="el-zoom-in-top">
       <div class="filter-container" v-show="showSearchMore">
         <el-input placeholder="单据编号" v-model.trim="listQuery.code" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
-        <el-input placeholder="调出渠道编号" v-model.trim="listQuery.channelCode" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
-        <el-input placeholder="调入渠道编号" v-model.trim="listQuery.toChannelCode" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
+        <el-input placeholder="渠道编号" v-model.trim="listQuery.channelCode" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
         <el-input placeholder="创建人" v-model.trim="listQuery.createUserName" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
         <el-input placeholder="审核人" v-model.trim="listQuery.auditUserName" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
       </div>
@@ -45,54 +44,64 @@
       border
     >
       <el-table-column type="selection" width="35"/>
-      <el-table-column label="单据编号" align="center" width="300%">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('bill_code') > -1" label="单据编号" align="center" width="300%">
         <template slot-scope="scope">
           <router-link :to="'/bill/channel/channel_loss_detail/'+scope.row.id" class="link-type">
             {{ scope.row.code }}
           </router-link>
         </template>
       </el-table-column>
-      <el-table-column label="单据时间" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('bill_date') > -1" label="单据时间" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.billDate }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="渠道编号" align="center">
+      <el-table-column v-if="diyValues.indexOf('create_date') > -1" label="创建时间" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.createDate }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="diyValues.indexOf('update_date') > -1" label="更新时间" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.updateDate }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('channel_code') > -1" label="渠道编号" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.channelCode }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="渠道名称" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('channel_name') > -1" label="渠道名称" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.channelName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="总数量" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('total_count') > -1" label="总数量" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.totalCount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="总金额" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('total_amount') > -1" label="总金额" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.totalAmount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="总吊牌价" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('total_tag_amount') > -1" label="总吊牌额" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.totalTagAmount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建人" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('create_user_name') > -1" label="创建人" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.createUserName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="审核人" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('audit_user_name') > -1" label="审核人" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.auditUserName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center">
+      <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('status') > -1" label="状态" align="center">
         <template slot-scope="scope">
           <span><el-tag :type="getStatusTag(scope.row.status)">{{ scope.row.statusMean }}</el-tag></span>
         </template>
@@ -106,7 +115,7 @@
 
     <export-dialog :show.sync="exportDialogVisible" bill-type="channel_loss"/>
 
-    <import-dialog :show.sync="importDialogVisible" bill-type="channel_loss" bill-key="c2s" @get-list="getList"/>
+    <import-dialog :show.sync="importDialogVisible" bill-type="channel_loss" bill-key="ci" @get-list="getList"/>
 
   </div>
 </template>
@@ -122,6 +131,7 @@
   import editButton from '@/z/bill/components/editButton'
   import addButton from '@/z/bill/components/addButton'
   import permission from '@/directive/permission/index.js'
+  import {getList as getDiy} from '@/api/user/diy'
 
   export default {
     name: 'channel_loss',
@@ -157,10 +167,13 @@
         //导出
         exportDialogVisible: false,
         //导入
-        importDialogVisible: false
+        importDialogVisible: false,
+        //偏好
+        diyValues: []
       }
     },
     created() {
+      getDiy({type: 'BILL_LIST'}).then(response => this.diyValues = response.data)
       this.getList()
     },
     methods: {

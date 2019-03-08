@@ -23,10 +23,16 @@
                   <el-date-picker class="full_with_date" v-model="form.billDate" type="date" format="yyyy-MM-dd" value-format="yyyy-MM-dd" placeholder="选择日期" :picker-options="pickerOptions" :disabled="isDetail"/>
                 </el-form-item>
               </el-col>
-
+              <el-col :span="6">
+                <el-form-item label="手工单号" prop="manualCode">
+                  <el-input v-model="form.manualCode" clearable/>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
               <el-col :span="6">
                 <el-form-item label="供应商" prop="supplierId">
-                  <el-select :disabled="isDetail" v-model="form.supplierId" filterable clearable remote default-first-option placeholder="请输入供应商编号" :loading="loadingOptionSupplierList" style="width: 100%" :remote-method="searchSupplierOption">
+                  <el-select :disabled="isDetail" v-model="form.supplierId" filterable clearable remote default-first-option placeholder="请输入供应商" :loading="loadingOptionSupplierList" style="width: 100%" :remote-method="searchSupplierOption">
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
                     <el-option v-for="item in optionSupplierList" :value="item.id" :label="item.name +'-'+item.code"/>
                   </el-select>
@@ -34,61 +40,17 @@
               </el-col>
               <el-col :span="6">
                 <el-form-item label="渠道" prop="channelId">
-                  <el-select :disabled="isDetail" v-model="form.channelId" filterable clearable remote default-first-option placeholder="请输入渠道编号" :loading="loadingOptionWarehouseList" style="width: 100%" :remote-method="searchWarehouseOption">
+                  <el-select :disabled="isDetail" v-model="form.channelId" filterable clearable remote default-first-option placeholder="请输入渠道" :loading="loadingOptionWarehouseList" style="width: 100%" :remote-method="searchWarehouseOption">
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
                     <el-option v-for="item in optionWarehouseList" :value="item.id" :label="item.name +'-'+item.code"/>
                   </el-select>
                 </el-form-item>
               </el-col>
             </el-row>
-            <el-row :gutter="20" v-if="isDetail">
-              <el-col :span="6">
-                <el-form-item label="创建时间">
-                  <el-input prefix-icon="el-icon-time" :value="form.createDate" :disabled="isDetail"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="创建人">
-                  <el-input v-model="form.createUserName" :disabled="isDetail"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="审核时间">
-                  <el-input prefix-icon="el-icon-time" :value="form.auditDate" :disabled="isDetail"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="审核人">
-                  <el-input v-model="form.auditUserName" :disabled="isDetail"/>
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-row :gutter="20" v-if="isDetail">
-              <el-col :span="6">
-                <el-form-item label="最后更新时间">
-                  <el-input prefix-icon="el-icon-time" :value="form.updateDate" :disabled="isDetail"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="单据状态">
-                  <el-input v-model="form.statusMean" :disabled="isDetail"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="总数量">
-                  <el-input v-model="form.totalCount" :disabled="isDetail"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="总金额">
-                  <el-input v-model="form.totalAmount" :disabled="isDetail"/>
-                </el-form-item>
-              </el-col>
-            </el-row>
           </el-tab-pane>
 
-          <el-tab-pane label="货品信息" name="GOODS">
-            <detail-goods ref="detailGoods" :list-loading="listLoading" :list.sync="list"/>
+          <el-tab-pane label="货品信息" name="GOODS" :disabled="form.channelId == ''">
+            <detail-goods ref="detailGoods" :list-loading="listLoading" :list.sync="list" :channelId="form.channelId"/>
           </el-tab-pane>
         </el-tabs>
       </el-form>
@@ -105,7 +67,7 @@
   import {getList as getWarehouseList} from '@/api/info/channel'
   import detailGoods from '@/z/bill/components/detailGoods'
   import {initDate,getPickerOptions} from '@/z/bill/components/commonMethod'
-
+  import {backUrl} from '@/z/common/commonMethod'
 
   export default {
     name: 'supplier2channel_detail',
@@ -124,7 +86,8 @@
           channelId: '',
           billDate: initDate(),
           code: '',
-          status: 'PENDING'
+          status: 'PENDING',
+          manualCode:''
         },
         //明细列表
         list: [],
@@ -158,10 +121,6 @@
           }
           this.optionSupplierList.push({id: this.form.supplierId, name: this.form.supplierName, code: this.form.supplierCode})
           this.optionWarehouseList.push({id: this.form.channelId, name: this.form.channelName, code: this.form.channelCode})
-          response.data.goodsList.forEach(d => {
-            d.optionGoodsList = []
-            d.optionGoodsList.push({id: d.goodsId, name: d.goodsName, code: d.goodsCode})
-          })
           this.list = response.data.goodsList
         }).catch(() => this.loading = false)
       }
@@ -198,13 +157,7 @@
             save(this.form).then(response => {
               this.loading = false
               this.$message({message: response.message, type: 'success'})
-              let thisView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == this.$route.fullPath)
-              this.$store.dispatch('delView', thisView).then(() => {
-                let backView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == "/bill/channel/supplier2channel")
-                if (backView != null) {
-                  this.$store.dispatch('delCachedView', backView).then(() => this.$nextTick(() => this.$router.replace({path: '/redirect' + backView.fullPath})))
-                }
-              })
+              backUrl(this, '/bill/channel/supplier2channel')
             }).catch((err) => this.loading = false)
           } else {
             this.activeName = 'BASE'
@@ -215,7 +168,7 @@
       searchSupplierOption(query) {
         if (query !== '') {
           this.loadingOptionSupplierList = true
-          getSupplierList({pageIndex: 1, pageSize: 10, code: query}).then(response => {
+          getSupplierList({pageIndex: 1, pageSize: 10, searchKey: query}).then(response => {
             this.loadingOptionSupplierList = false
             this.optionSupplierList = response.data.content
           })
@@ -227,7 +180,7 @@
       searchWarehouseOption(query) {
         if (query !== '') {
           this.loadingOptionWarehouseList = true
-          getWarehouseList({pageIndex: 1, pageSize: 10, code: query}).then(response => {
+          getWarehouseList({pageIndex: 1, pageSize: 10, searchKey: query}).then(response => {
             this.loadingOptionWarehouseList = false
             this.optionWarehouseList = response.data.content
           })

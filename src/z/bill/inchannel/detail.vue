@@ -23,6 +23,11 @@
                   <el-date-picker class="full_with_date" v-model="form.billDate" type="date" format="yyyy-MM-dd" value-format="yyyy-MM-dd" placeholder="选择日期" :picker-options="pickerOptions"/>
                 </el-form-item>
               </el-col>
+              <el-col :span="6">
+                <el-form-item label="手工单号" prop="manualCode">
+                  <el-input v-model="form.manualCode" clearable/>
+                </el-form-item>
+              </el-col>
             </el-row>
             <el-row :gutter="20">
               <el-col :span="6">
@@ -44,54 +49,13 @@
                 </el-form-item>
               </el-col>
             </el-row>
-            <el-row :gutter="20" v-if="isDetail">
-              <el-col :span="6">
-                <el-form-item label="创建时间">
-                  <el-input prefix-icon="el-icon-time" :value="form.createDate"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="创建人">
-                  <el-input :value="form.createUserName"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="审核时间">
-                  <el-input prefix-icon="el-icon-time" :value="form.auditDate"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="审核人">
-                  <el-input :value="form.auditUserName"/>
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-row :gutter="20" v-if="isDetail">
-              <el-col :span="6">
-                <el-form-item label="最后更新时间">
-                  <el-input prefix-icon="el-icon-time" :value="form.updateDate"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="单据状态">
-                  <el-input :value="form.statusMean"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="总数量">
-                  <el-input :value="form.totalCount"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="总金额">
-                  <el-input :value="form.totalAmount"/>
-                </el-form-item>
-              </el-col>
-            </el-row>
           </el-tab-pane>
 
-          <el-tab-pane label="货品信息" name="GOODS">
-            <detail-goods ref="detailGoods" :list-loading="listLoading" :list.sync="list"/>
+          <el-tab-pane label="货品信息" name="GOODS" :disabled="form.parentBillId == ''">
+            <detail-goods ref="detailGoods" :list-loading="listLoading" :list.sync="list" :hasParent="true" :parentList="parentList" :channelId="form.channelId" :parentTypeName="'仓库出货'"/>
+          </el-tab-pane>
+          <el-tab-pane label="差异数" name="DIFF" :disabled="form.parentBillId == ''">
+            <diff-goods ref="diffGoods" :list-loading="listLoading" :list.sync="list" :parentList="parentList"/>
           </el-tab-pane>
         </el-tabs>
       </el-form>
@@ -105,13 +69,14 @@
   import Sticky from '@/components/Sticky'
   import {save, get, getParentBill, getParentBillGoods} from '@/api/bill/inchannel'
   import detailGoods from '@/z/bill/components/detailGoods'
-  import {initDate,getPickerOptions} from '@/z/bill/components/commonMethod'
-
+  import diffGoods from '@/z/bill/components/diffGoods'
+  import {initDate, getPickerOptions} from '@/z/bill/components/commonMethod'
+  import {backUrl} from '@/z/common/commonMethod'
 
   export default {
     name: 'inchannel_detail',
     components: {
-      Sticky, detailGoods
+      Sticky, detailGoods, diffGoods
     },
     data() {
       return {
@@ -124,10 +89,12 @@
           parentBillId: '',
           billDate: initDate(),
           code: '',
-          status: 'PENDING'
+          status: 'PENDING',
+          manualCode:''
         },
         //明细列表
         list: [],
+        parentList: [],
         listLoading: false,
         rules: {
           billDate: [{required: true, message: '必填字段', trigger: 'blur'}],
@@ -146,17 +113,15 @@
       if (id != null) {
         this.loading = true
         get({id: id}).then(response => {
-          this.loading = false
           this.form = response.data
           if (this.form.status !== 'DRAFT') {
             this.form.status = 'PENDING'
           }
-          this.optionParentBillList.push({id: this.form.parentBillId, code: this.form.parentBillCode,channelId:this.form.channelId,channelCode:this.form.channelCode,channelName:this.form.channelName,warehouseId:this.form.warehouseId,warehouseCode:this.form.warehouseCode,warehouseName:this.form.warehouseName})
-          response.data.goodsList.forEach(d => {
-            d.optionGoodsList = []
-            d.optionGoodsList.push({id: d.goodsId, name: d.goodsName, code: d.goodsCode})
-          })
+          this.optionParentBillList.push({id: this.form.parentBillId, code: this.form.parentBillCode, channelId: this.form.channelId, channelCode: this.form.channelCode, channelName: this.form.channelName, warehouseId: this.form.warehouseId, warehouseCode: this.form.warehouseCode, warehouseName: this.form.warehouseName})
           this.list = response.data.goodsList
+          getParentBillGoods({id: this.form.parentBillId}).then(response => {
+            this.parentList = response.data
+          }).finally(() => this.loading = false)
         }).catch(() => this.loading = false)
       }
     },
@@ -165,6 +130,8 @@
       handleTagPaneClick(tab, event) {
         if (tab.name === 'GOODS') {
           this.$refs.detailGoods.initFocus()
+        } else if (tab.name === 'DIFF') {
+          this.$refs.diffGoods.init()
         }
       },
       //保存
@@ -194,13 +161,7 @@
             save(this.form).then(response => {
               this.loading = false
               this.$message({message: response.message, type: 'success'})
-              let thisView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == this.$route.fullPath)
-              this.$store.dispatch('delView', thisView).then(() => {
-                let backView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == "/bill/channel/inchannel")
-                if (backView != null) {
-                  this.$store.dispatch('delCachedView', backView).then(() => this.$nextTick(() => this.$router.replace({path: '/redirect' + backView.fullPath})))
-                }
-              })
+              backUrl(this, '/bill/channel/inchannel')
             }).catch((err) => this.loading = false)
           } else {
             this.activeName = 'BASE'
@@ -233,13 +194,10 @@
           this.form.warehouseCode = ele.warehouseCode
           this.loading = true
           getParentBillGoods({id: id}).then(response => {
-            response.data.forEach(d => {
-              d.optionGoodsList = []
-              d.optionGoodsList.push({id: d.goodsId, name: d.goodsName, code: d.goodsCode})
-            })
-            this.loading = false
+            this.parentList = JSON.parse(JSON.stringify(response.data))
             this.list = response.data
-          })
+            this.list.forEach(g => g.detail.forEach(s => s.billCount = ''))
+          }).finally(() => this.loading = false)
         }
       }
     }

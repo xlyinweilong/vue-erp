@@ -17,6 +17,20 @@ service.interceptors.request.use(
       // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
       config.headers['X-Token'] = getToken()
     }
+    if (config.params != null) {
+      for (let i in config.params) {
+        if (config.params[i] === '') {
+          config.params[i] = null
+        }
+      }
+    }
+    if (config.data != null) {
+      for (let i in config.data) {
+        if (config.data[i] === '') {
+          config.data[i] = null
+        }
+      }
+    }
     return config
   },
   error => {

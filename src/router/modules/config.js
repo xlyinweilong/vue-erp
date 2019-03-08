@@ -25,6 +25,12 @@ const configRouter = {
       component: () => import('@/z/config/payment'),
       name: 'payment',
       meta: {title: '支付方式'}
+    },
+    {
+      path: 'bill_print',
+      component: () => import('@/z/config/print/bill_print'),
+      name: 'bill_print',
+      meta: {title: '单据打印'}
     }
   ]
 }

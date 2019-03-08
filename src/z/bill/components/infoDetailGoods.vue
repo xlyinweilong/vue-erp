@@ -32,17 +32,22 @@
         </el-table-column>
         <el-table-column label="数量" align="center">
           <template slot-scope="scope">
-            <span>{{ scope.row.detail.filter(d => d.billCount > 0).reduce((t,d) => t + parseInt(d.billCount),0) }}</span>
+            <span>{{ scope.row.detail.filter(d => d.billCount > 0 || d.billCount < 0).reduce((t,d) => t + parseInt(d.billCount),0) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column v-if="hasParent" label="差异数" align="center">
+          <template slot-scope="scope">
+            <span :style="differenceGoodsCount(scope.row) > 0 ? 'color:red' : ''" v-text="differenceGoodsCount(scope.row)"></span>
           </template>
         </el-table-column>
         <el-table-column label="金额" align="center">
           <template slot-scope="scope">
-            <span>{{ scope.row.detail.filter(d => d.billCount > 0).reduce((t,d) => t + parseInt(d.billCount),0) * scope.row.price}}</span>
+            <span>{{ scope.row.detail.filter(d => d.billCount > 0 || d.billCount < 0).reduce((t,d) => t + parseInt(d.billCount),0) * scope.row.price}}</span>
           </template>
         </el-table-column>
         <el-table-column label=吊牌额 align="center">
           <template slot-scope="scope">
-            <span>{{ scope.row.detail.filter(d => d.billCount > 0).reduce((t,d) => t + parseInt(d.billCount),0) * scope.row.tagPrice}}</span>
+            <span>{{ scope.row.detail.filter(d => d.billCount > 0 || d.billCount < 0).reduce((t,d) => t + parseInt(d.billCount),0) * scope.row.tagPrice}}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" align="center">
@@ -102,12 +107,16 @@
         dialogFormGoodsId: '',
         goodsDetail: {sizeList: [], tableData: []},
         dialogLoading: false,
-        listQuery: {pageIndex: 1, pageSize: 10, searchKey: ''},
-        list: []
+        list:[],
+        listQuery: {pageIndex: 1, pageSize: 10, searchKey: ''}
       };
     },
     props: {
-      listLoading: {default: false}
+      warehouseId: {default: '', required: false},
+      channelId: {default: '', required: false},
+      listLoading: {default: false},
+      parentList: {required: false},
+      hasParent: {default: false, required: false}
     },
     methods: {
       initPage(list) {
@@ -125,8 +134,14 @@
         const sums = [];
         sums[0] = '合计'
         sums[3] = param.data.reduce((x, y) => x + y.detail.filter(d => d.billCount > 0).reduce((t, d) => t + parseInt(d.billCount), 0), 0)
-        sums[4] = param.data.reduce((x, y) => x + y.price * y.detail.filter(d => d.billCount > 0).reduce((t, d) => t + parseInt(d.billCount), 0), 0)
-        sums[5] = param.data.reduce((x, y) => x + (isNaN(y.tagPrice) ? 0 : y.tagPrice) * y.detail.filter(d => d.billCount > 0).reduce((t, d) => t + parseInt(d.billCount), 0), 0)
+        let amountNum = 4
+        let tagAmountNum = 5
+        if (this.hasParent) {
+          amountNum += 1
+          tagAmountNum += 1
+        }
+        sums[amountNum] = param.data.reduce((x, y) => x + y.price * y.detail.filter(d => d.billCount > 0).reduce((t, d) => t + parseInt(d.billCount), 0), 0)
+        sums[tagAmountNum] = param.data.reduce((x, y) => x + (isNaN(y.tagPrice) ? 0 : y.tagPrice) * y.detail.filter(d => d.billCount > 0).reduce((t, d) => t + parseInt(d.billCount), 0), 0)
         return sums;
       },
       //弹出框
@@ -163,6 +178,34 @@
         goods.detail = [];
         this.goodsDetail.tableData.forEach(d => d.data.filter(s => s.billCount > 0).forEach(s => goods.detail.push({sizeId: s.sizeId, colorId: d.colorId, billCount: s.billCount})));
         this.dialogFormShow = false
+      },
+      //差异数
+      differenceGoodsCount(row) {
+        if (!this.hasParent) {
+          return 0
+        }
+        let goods = this.parentList.find(p => p.goodsId === row.goodsId)
+        if (goods != null) {
+          //对比每个尺码
+          let totalDiff = 0
+          goods.detail.forEach(p => {
+            let rs = row.detail.find(s => s.sizeId === p.sizeId && s.colorId === p.colorId)
+            if (rs != null) {
+              totalDiff += Math.abs(p.billCount - rs.billCount)
+            } else {
+              totalDiff += p.billCount
+            }
+          })
+          row.detail.forEach(p => {
+            let rs = goods.detail.find(s => s.sizeId === p.sizeId && s.colorId === p.colorId)
+            if (rs == null) {
+              totalDiff += p.billCount
+            }
+          })
+          return totalDiff
+        } else {
+          return row.detail.filter(d => d.billCount > 0).reduce((t, d) => t + parseInt(d.billCount), 0)
+        }
       }
     }
   }

@@ -78,3 +78,28 @@ export function uploadStatus(params) {
     params: params
   })
 }
+
+/**
+ * 查询可以盘点的时间
+ */
+export function loadInventoryDateList(billType, params) {
+  return request({
+    url: 'api/bill/' + billType + '/load_inventory_date_list',
+    method: 'get',
+    params: params
+  })
+}
+
+/**
+ * 盘点
+ *
+ * @param data
+ */
+export function inventory(billType, data) {
+  return request({
+    url: 'api/bill/' + billType + '/inventory',
+    method: 'post',
+    data
+  })
+}
+

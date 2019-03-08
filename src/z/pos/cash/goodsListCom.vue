@@ -18,60 +18,60 @@
         <span>{{ scope.row.code }}</span>
       </template>
     </el-table-column>
-    <el-table-column label="促销活动" align="center">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('activity') > -1" label="促销活动" align="center">
       <template slot-scope="scope">
         <el-select v-model="scope.row.activityId" placeholder="请选择" @change="doSetAllGoods">
           <el-option v-for="item in scope.row.canJoinActivityList" :label="item.name" :value="item.id"/>
         </el-select>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('goods_name') > -1" label="货品名称" align="center" width="200%">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('goods_name') > -1" label="货品名称" align="center" width="200%">
       <template slot-scope="scope">
         <span>{{ scope.row.goodsName }}</span>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('goods_color_code') > -1" label="颜色编号" align="center">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('goods_color_code') > -1" label="颜色编号" align="center">
       <template slot-scope="scope">
         <span>{{ scope.row.goodsColorCode }}</span>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('goods_color_name') > -1" label="颜色名称" align="center">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('goods_color_name') > -1" label="颜色名称" align="center">
       <template slot-scope="scope">
         <span>{{ scope.row.goodsColorName }}</span>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('goods_size_name') > -1" label="尺码" align="center">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('goods_size_name') > -1" label="尺码" align="center">
       <template slot-scope="scope">
         <span>{{ scope.row.goodsSizeName }}</span>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('tag_price') > -1" label="吊牌价" align="center" width="70%">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('tag_price') > -1" label="吊牌价" align="center" width="70%">
       <template slot-scope="scope">
         <span>{{ scope.row.tagPrice }}</span>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('bill_count') > -1" label="数量" align="center" width="50%">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('bill_count') > -1" label="数量" align="center" width="50%">
       <template slot-scope="scope">
         <el-input-number style="width: 100%;" v-model="scope.row.billCount" :precision="0" :step="1" :controls="false" @change="doSetAllGoods"></el-input-number>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('price') > -1" label="折扣" align="center" width="70%">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('discount') > -1" label="折扣" align="center" width="70%">
       <template slot-scope="scope">
         <el-input-number style="width: 100%;" v-model="scope.row.discount" :precision="2" :step="0.1" :min="0" :controls="false" @change="scope.row.price=scope.row.tagPrice*scope.row.discount;diyPrice(scope.row)"></el-input-number>
         <!--<span>{{ scope.row.price/scope.row.tagPrice }}</span>-->
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('price') > -1" label="单价" align="center" width="120%">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('price') > -1" label="单价" align="center" width="120%">
       <template slot-scope="scope">
         <el-input-number style="width: 100%;" v-model="scope.row.price" :precision="2" :step="0.1" :min="0" :controls="false" @change="diyPrice(scope.row)"></el-input-number>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('amount') > -1" label="金额" align="center" width="95%">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('amount') > -1" label="金额" align="center" width="95%">
       <template slot-scope="scope">
         <span>{{ scope.row.amount }}</span>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('employ') > -1" label="营业员" align="center" width="200%">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('employ') > -1" label="营业员" align="center" width="200%">
       <template slot-scope="scope">
         <el-select v-model="scope.row.employId" filterable clearable remote default-first-option placeholder="请输入营业员" :remote-method="searchEmploy" @change="changeEmploy(scope.row)" :loading="loadingEmploy" style="width: 100%">
           <i slot="prefix" class="el-input__icon el-icon-search"></i>
@@ -80,12 +80,12 @@
         </el-select>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('stock_count') > -1" label="库存" align="center" width="50%">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('stock_count') > -1" label="库存" align="center" width="50%">
       <template slot-scope="scope">
         <span>{{ scope.row.stockCount }}</span>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.indexOf('remarks') > -1" label="备注" align="center">
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('remarks') > -1" label="备注" align="center">
       <template slot-scope="scope">
         <el-input v-model="scope.row.remarks" placeholder="请输入内容"></el-input>
       </template>

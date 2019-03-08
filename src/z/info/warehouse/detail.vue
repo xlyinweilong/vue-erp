@@ -20,7 +20,7 @@
                 </el-form-item>
               </el-col>
               <el-col :span="6">
-                <el-form-item label="组" prop="name">
+                <el-form-item label="组" prop="groupId">
                   <el-select :disabled="isDetail" v-model="form.groupId" filterable clearable remote default-first-option placeholder="请输入关键词" :remote-method="searchGroup" :loading="searchTextLoading" style="width: 100%">
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
                     <el-option v-for="item in searchText.optionGroup" :value="item.id" :label="item.name"/>
@@ -65,6 +65,7 @@
   import Sticky from '@/components/Sticky'
   import {getDictList} from '@/api/info/dict'
   import {getAll} from '@/api/config/config'
+  import {backUrl} from '@/z/common/commonMethod'
 
   export default {
     name: 'warehouse_detail',
@@ -125,13 +126,7 @@
             this.form.warehouseConfigList = this.warehouseConfigList.filter(r => r.defaultValue !== -1)
             save(this.form).then(response => {
               this.$message({message: response.message, type: 'success'})
-              let thisView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == this.$route.fullPath)
-              this.$store.dispatch('delView', thisView).then(() => {
-                let backView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == "/info/warehouse")
-                if (backView != null) {
-                  this.$store.dispatch('delCachedView', backView).then(() => this.$nextTick(() => this.$router.replace({path: '/redirect' + backView.fullPath})))
-                }
-              })
+              backUrl(this, '/info/warehouse')
             }).finally(() => this.loading = false)
           }else {
             this.activeName = 'BASE'

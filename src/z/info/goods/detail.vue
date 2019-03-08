@@ -41,7 +41,7 @@
             </el-row>
             <el-row :gutter="20">
               <el-col :span="6">
-                <el-form-item label="吊盘价1" prop="tagPrice1">
+                <el-form-item label="吊牌价1" prop="tagPrice1">
                   <el-input v-model.number="form.tagPrice1" @keyup.enter.native="saveData" :disabled="isDetail"></el-input>
                 </el-form-item>
               </el-col>
@@ -166,6 +166,7 @@
   import {getDictList} from '@/api/info/dict'
   import {getList} from '@/api/info/supplier'
   import Sticky from '@/components/Sticky'
+  import {backUrl} from '@/z/common/commonMethod'
 
   export default {
     name: 'goods_detail',
@@ -272,13 +273,7 @@
             save(this.form).then(response => {
               this.loading = false
               this.$message({message: response.message, type: 'success'})
-              let thisView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == this.$route.fullPath)
-              this.$store.dispatch('delView', thisView).then(() => {
-                let backView = this.$store.state.tagsView.visitedViews.find(r => r.fullPath == "/info/goods")
-                if (backView != null) {
-                  this.$store.dispatch('delCachedView', backView).then(() => this.$nextTick(() => this.$router.replace({path: '/redirect' + backView.fullPath})))
-                }
-              })
+              backUrl(this, '/info/goods')
             }).catch((err) => this.loading = false)
           } else {
             this.activeName = 'BASE'

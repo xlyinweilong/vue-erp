@@ -15,7 +15,18 @@
                   <el-input prefix-icon="el-icon-time" :value="form.billDate" :disabled="isDetail"/>
                 </el-form-item>
               </el-col>
-
+              <el-col :span="6">
+                <el-form-item label="手工单号" prop="manualCode">
+                  <el-input v-model="form.manualCode" :disabled="true"/>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="采购单" prop="parentBillCode">
+                  <el-input prefix-icon="el-icon-search" :value="form.parentBillCode" :disabled="true"/>
+                </el-form-item>
+              </el-col>
               <el-col :span="6">
                 <el-form-item label="供应商" prop="supplierId">
                   <el-input prefix-icon="el-icon-search" :value="form.supplierName  +'-'+form.supplierCode" :disabled="isDetail"/>
@@ -125,10 +136,6 @@
           if (this.form.status !== 'DRAFT') {
             this.form.status = 'PENDING'
           }
-          response.data.goodsList.forEach(d => {
-            d.optionGoodsList = []
-            d.optionGoodsList.push({id: d.goodsId, name: d.goodsName, code: d.goodsCode})
-          })
           this.list = response.data.goodsList
           this.$refs.detailGoods.initPage(this.list)
         }).catch(() => this.loading = false)

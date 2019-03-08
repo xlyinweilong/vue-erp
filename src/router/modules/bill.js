@@ -15,62 +15,89 @@ const billRouter = {
   },
   children: [
     {
-      path: 'purchase',
+      path: 'chain',
       component: () => import('@/z/bill/index'),
-      name: 'purchase',
-      meta: {title: '采购管理',power: 'bill_warehouse_'},
-      redirect: '/bill/warehouse/supplier2warehouse',
+      name: 'chain',
+      meta: {title: '供应链',power: 'bill_chain_'},
+      redirect: '/bill/chain/purchase',
       children: [
         {
           path: 'purchase',
-          component: () => import('@/z/bill/supplier2warehouse/list'),
+          component: () => import('@/z/bill/purchase/list'),
           name: 'purchase',
-          meta: {title: '采购单', power: 'bill_warehouse_cjlh'}
+          meta: {title: '采购单', power: 'bill_chain_purchase'}
         },
         {
           path: 'purchase_create',
-          component: () => import('@/z/bill/supplier2warehouse/detail'),
+          component: () => import('@/z/bill/purchase/detail'),
           name: 'purchase_create',
           hidden: true,
           meta: {title: '采购单-新增'}
         },
         {
           path: 'purchase_update/:id',
-          component: () => import('@/z/bill/supplier2warehouse/detail'),
+          component: () => import('@/z/bill/purchase/detail'),
           name: 'purchase_update',
           hidden: true,
           meta: {title: '采购单-修改'}
         },
         {
           path: 'purchase_detail/:id',
-          component: () => import('@/z/bill/supplier2warehouse/info'),
+          component: () => import('@/z/bill/purchase/info'),
           name: 'purchase_info',
           hidden: true,
           meta: {title: '采购单-详情'}
         },
         {
+          path: 'order',
+          component: () => import('@/z/bill/order/list'),
+          name: 'order',
+          meta: {title: '订货单',power: 'bill_chain_order'}
+        },
+        {
+          path: 'order_create',
+          component: () => import('@/z/bill/order/detail'),
+          name: 'order_create',
+          hidden: true,
+          meta: {title: '订货单-新增'}
+        },
+        {
+          path: 'order_update/:id',
+          component: () => import('@/z/bill/order/detail'),
+          name: 'order_update',
+          hidden: true,
+          meta: {title: '订货单-修改'}
+        },
+        {
+          path: 'order_detail/:id',
+          component: () => import('@/z/bill/order/info'),
+          name: 'order_info',
+          hidden: true,
+          meta: {title: '订货单-详情'}
+        },
+        {
           path: 'delivery',
-          component: () => import('@/z/bill/warehouse2channel/list'),
+          component: () => import('@/z/bill/delivery/list'),
           name: 'delivery',
-          meta: {title: '配货单',power: 'bill_warehouse_ckch'}
+          meta: {title: '配货单',power: 'bill_chain_delivery'}
         },
         {
           path: 'delivery_create',
-          component: () => import('@/z/bill/warehouse2channel/detail'),
+          component: () => import('@/z/bill/delivery/detail'),
           name: 'delivery_create',
           hidden: true,
           meta: {title: '配货单-新增'}
         },
         {
           path: 'delivery_update/:id',
-          component: () => import('@/z/bill/warehouse2channel/detail'),
+          component: () => import('@/z/bill/delivery/detail'),
           name: 'delivery_update',
           hidden: true,
           meta: {title: '配货单-修改'}
         },
         {
           path: 'delivery_detail/:id',
-          component: () => import('@/z/bill/warehouse2channel/info'),
+          component: () => import('@/z/bill/delivery/info'),
           name: 'delivery_info',
           hidden: true,
           meta: {title: '配货单-详情'}
@@ -245,6 +272,12 @@ const billRouter = {
           name: 'warehouse_loss_info',
           hidden: true,
           meta: {title: '仓库损益-详情'}
+        },
+        {
+          path: 'warehouse_settlement',
+          component: () => import('@/z/bill/warehouse_settlement/list'),
+          name: 'warehouse_settlement',
+          meta: {title: '仓库结存',power: 'bill_warehouse_settlement'}
         }
       ]
     },
@@ -470,6 +503,39 @@ const billRouter = {
           name: 'channel_loss_info',
           hidden: true,
           meta: {title: '渠道损益-详情'}
+        },
+        {
+          path: 'notice_channel2channel_out',
+          component: () => import('@/z/bill/notice_channel2channel_out/list'),
+          name: 'notice_channel2channel_out',
+          meta: {title: '渠道调出通知单',power: 'bill_channel_nqddc'}
+        },
+        {
+          path: 'notice_channel2channel_out_create',
+          component: () => import('@/z/bill/notice_channel2channel_out/detail'),
+          name: 'notice_channel2channel_out_create',
+          hidden: true,
+          meta: {title: '渠道调出通知单-新增'}
+        },
+        {
+          path: 'notice_channel2channel_out_update/:id',
+          component: () => import('@/z/bill/notice_channel2channel_out/detail'),
+          name: 'notice_channel2channel_out_update',
+          hidden: true,
+          meta: {title: '渠道调出通知单-修改'}
+        },
+        {
+          path: 'notice_channel2channel_out_detail/:id',
+          component: () => import('@/z/bill/notice_channel2channel_out/info'),
+          name: 'notice_channel2channel_out_info',
+          hidden: true,
+          meta: {title: '渠道调出通知单-详情'}
+        },
+        {
+          path: 'channel_settlement',
+          component: () => import('@/z/bill/channel_settlement/list'),
+          name: 'channel_settlement',
+          meta: {title: '渠道结存',power: 'bill_channel_settlement'}
         }
       ]
     }

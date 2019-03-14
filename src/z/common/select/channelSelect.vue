@@ -34,7 +34,7 @@
       initChannel() {
         this.tempChannelId = this.channelId
         this.optionChannel = []
-        if (this.channelId != '') {
+        if (this.channelId != null && this.channelId != '') {
           this.optionChannel.push({id: this.channelId, name: this.channelName, code: this.channelCode})
         }
       },

@@ -8,6 +8,10 @@ export function getGoodsList(params) {
   })
 }
 
+/**
+ * 扫码
+ * @param params
+ */
 export function searchBarCode(params) {
   return request({
     url: 'api/info/barCode/info_by_code',
@@ -48,6 +52,19 @@ export function activityList(params) {
 export function pay(data) {
   return request({
     url: 'api/pos/cash/pay',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 查询销售
+ *
+ * @param params
+ */
+export function getPosList(data) {
+  return request({
+    url: 'api/pos/cash/pos_list',
     method: 'post',
     data
   })

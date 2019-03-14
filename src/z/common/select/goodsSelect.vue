@@ -20,9 +20,10 @@
     },
     props: {
       goodsId: {default: ''},
-      goodsName: {default: ''},
-      goodsCode: {default: ''},
-      isDisabled: {default: false}
+      goodsName: {default: '', required: false},
+      goodsCode: {default: '', required: false},
+      isDisabled: {default: false, required: false},
+      isCallBack: {default: false, required: false},
     },
     watch: {
       goodsId: 'initGoods'
@@ -34,7 +35,7 @@
       initGoods() {
         this.tempGoodsId = this.goodsId
         this.optionGoods = []
-        if (this.goodsId != '') {
+        if (this.goodsId != null && this.goodsId != '') {
           this.optionGoods.push({id: this.goodsId, name: this.goodsName, code: this.goodsCode})
         }
       },
@@ -50,6 +51,10 @@
       },
       changeSelect() {
         this.$emit("update:goodsId", this.tempGoodsId)
+        let goods = this.optionGoods.find(g => this.tempGoodsId === g.id)
+        if (this.isCallBack && goods != null) {
+          this.$emit("change", {id: this.tempGoodsId, code: goods.code, name: goods.name})
+        }
       }
     }
   }

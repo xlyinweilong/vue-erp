@@ -71,7 +71,7 @@
             <el-form-item label="类型" prop="type">
               <el-select style="width: 100%" v-model="temp.type" placeholder="请选择">
                 <el-option label="抵金" value="AMOUNT"/>
-                <el-option label="折扣" value="DISCOUNT"/>
+                <!--<el-option label="折扣" value="DISCOUNT"/>-->
               </el-select>
             </el-form-item>
           </el-col>
@@ -84,12 +84,12 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="生效时间" prop="startDate">
-              <el-date-picker v-model="temp.startDate" style="width: 100%" type="datetime" placeholder="选择日期时间"></el-date-picker>
+              <el-date-picker v-model="temp.startDate" style="width: 100%" type="datetime" format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间"></el-date-picker>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="充值金额" prop="endDate">
-              <el-date-picker v-model="temp.endDate" style="width: 100%" type="datetime" placeholder="选择日期时间"></el-date-picker>
+              <el-date-picker v-model="temp.endDate" style="width: 100%" type="datetime" format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间"></el-date-picker>
             </el-form-item>
           </el-col>
         </el-row>
@@ -102,6 +102,13 @@
           <el-col :span="12">
             <el-form-item label="条件金额" prop="conditionAmount">
               <el-input-number :precision="2" style="width: 100%" v-model="temp.conditionAmount" :min="0" :max="99999999" label="输入数字" :step="100" @keyup.enter.native="saveData"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20" v-show="temp.id  != null">
+          <el-col :span="12">
+            <el-form-item label="生成数量" prop="createCount">
+              <el-input-number style="width: 100%" v-model="temp.createCount" :min="1" :max="99999999" :precision="0" label="输入数字" :step="1" @keyup.enter.native="saveData"/>
             </el-form-item>
           </el-col>
         </el-row>
@@ -118,7 +125,7 @@
   import {getList, save, deleteEle} from '@/api/vip/coupon'
   import Pagination from '@/components/Pagination'
   import permission from '@/directive/permission/index.js'
-  import {initDate} from '@/z/bill/components/commonMethod'
+  import {initDateTime} from '@/z/bill/components/commonMethod'
   import vipSelect from '@/z/common/select/vipSelect'
 
   export default {
@@ -172,7 +179,7 @@
       },
       //弹出框新增
       createElement() {
-        this.temp = {id: '', vipId: '', type: 'AMOUNT', startDate: initDate(), conditionAmount: 0}
+        this.temp = {id: '', vipId: '', type: 'AMOUNT', startDate: initDateTime(), conditionAmount: 0, createCount: 1}
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
         this.$nextTick(() => {
@@ -185,7 +192,7 @@
 
         this.dialogStatus = 'update'
         this.temp = this.list.find(r => r.id === this.selectedIds[0].id)
-        if(this.temp.type == 'DISCOUNT'){
+        if (this.temp.type == 'DISCOUNT') {
           this.temp.amount = this.temp.discount
           this.temp.discount = 0
         }
@@ -193,7 +200,7 @@
       saveData() {
         this.$refs['vipCouponForm'].validate((valid) => {
           if (valid) {
-            if(this.temp.type == 'DISCOUNT'){
+            if (this.temp.type == 'DISCOUNT') {
               this.temp.discount = this.temp.amount
               this.temp.amount = 0
             }

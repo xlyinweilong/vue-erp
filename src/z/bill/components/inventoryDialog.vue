@@ -1,6 +1,6 @@
 <template>
-  <el-dialog v-loading="loading" title="盘点" :visible="show" width="35%" @close="onClose" @open="loadChannelList">
-    <el-form v-show="!loadingInventory">
+  <el-dialog  title="盘点" :visible="show" width="35%" @close="onClose" @open="loadChannelList">
+    <el-form v-loading="loading" v-show="!loadingInventory">
       <el-form-item :label="this.billType === 'warehouse_inventory' ? '选择盘点仓库' : '选择盘点渠道'">
         <el-select v-model="eleId" placeholder="请选择" @change="loadInventoryDateList">
           <el-option v-for="ele in eleList" :label="ele.name + '-' + ele.code" :value="ele.id"/>
@@ -15,8 +15,8 @@
     <span v-show="loadingInventory">正在盘点，这可能要花一点时间，请稍等...</span>
     <div slot="footer" class="dialog-footer">
       <el-button @click="onClose">取消</el-button>
-      <el-button type="primary" @click="inventory('PART')" v-loading="loadingInventory || loadingInventoryDateOptions" :disabled="eleId == '' || inventoryDate == ''">部分盘点</el-button>
-      <el-button type="primary" @click="inventory('ALL')" v-loading="loadingInventory || loadingInventoryDateOptions" :disabled="eleId == '' || inventoryDate == ''">整盘</el-button>
+      <el-button type="primary" @click="inventory('PART')" :loading="loadingInventory || loadingInventoryDateOptions" :disabled="eleId == '' || inventoryDate == ''">部分盘点</el-button>
+      <el-button type="primary" @click="inventory('ALL')" :loading="loadingInventory || loadingInventoryDateOptions" :disabled="eleId == '' || inventoryDate == ''">整盘</el-button>
     </div>
   </el-dialog>
 </template>

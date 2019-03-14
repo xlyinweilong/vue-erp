@@ -89,7 +89,7 @@
         this.$confirm('确定要删除选中的数据吗?', '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
           deleteEle({ids: this.selectedIds.map(s => s.id)}).then(response => {
             this.dialogFormVisible = false
-            this.$message({message: response.message, type: 'success'});
+            this.$message({message: response.message, type: 'success'})
             this.getList()
           })
         })

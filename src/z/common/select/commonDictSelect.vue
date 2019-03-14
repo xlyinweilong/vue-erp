@@ -35,7 +35,7 @@
       initEle() {
         this.tempId = this.eleId
         this.optionList = []
-        if (this.tempId != '') {
+        if (this.tempId != null && this.tempId != '') {
           this.optionList.push({id: this.eleId, name: this.eleName})
         }
       },

@@ -55,7 +55,7 @@ const vipRouter = {
       children: [
         {
           path: 'integral_log',
-          component: () => import('@/z/vip/integral/integral_add'),
+          component: () => import('@/z/vip/integral/integral_log'),
           name: 'integral_log',
           meta: {title: '会员积分日志'}
         },
@@ -89,7 +89,7 @@ const vipRouter = {
       children: [
         {
           path: 'balance_log',
-          component: () => import('@/z/vip/balance/balance_add'),
+          component: () => import('@/z/vip/balance/balance_log'),
           name: 'balance_log',
           meta: {title: '会员余额日志'}
         },
@@ -110,7 +110,7 @@ const vipRouter = {
       children: [
         {
           path: 'xp_log',
-          component: () => import('@/z/vip/xp/xp_add'),
+          component: () => import('@/z/vip/xp/xp_log'),
           name: 'xp_log',
           meta: {title: '会员经验日志'}
         },

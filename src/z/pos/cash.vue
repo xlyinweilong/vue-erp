@@ -40,10 +40,11 @@
               总金额：{{totalAmount}}
             </el-col>
           </el-row>
-          <goods-list-com :goodsList.sync="goodsList" :lastEmploy.sync="lastEmploy" :list-loading.sync="loading" :diy-values.sync="diyValues" :totalActivityList="totalActivityList" ref="goodsListCom" @doSetAllGoods="doSetAllGoods"/>
+          <goods-list-com :goodsList.sync="goodsList" :lastPoint.sync="lastPoint" :lastEmploy.sync="lastEmploy" :list-loading.sync="loading" :diy-values.sync="diyValues" :totalActivityList="totalActivityList" ref="goodsListCom" @doSetAllGoods="doSetAllGoods"/>
           <div class="filter-container" style="margin-top: 5px;">
             <el-button type="primary" @click="showPayment = true" :disabled="goodsList.length == 0">结算</el-button>
-            <el-button type="success" plain>挂单</el-button>
+            <el-button type="success" plain @click="showPuUp = true">挂单</el-button>
+            <el-button type="warning" plain @click="showDayKnots = true">日结</el-button>
           </div>
           <!--<saleActivity :channelId="channelId"/>-->
           <payment :show.sync="showPayment" :vip="vip" :totalAmount="totalAmount" :loading.sync="loading" @pay="pay"/>
@@ -56,6 +57,8 @@
         </el-tab-pane>
       </el-tabs>
     </div>
+    <putUpCom :show.sync="showPuUp" :goodsList="goodsList" :vip="vip" @callBack="putUpBack"/>
+    <dayKnotsCom :show.sync="showDayKnots" @callBack="putUpBack"/>
   </div>
 </template>
 
@@ -75,6 +78,9 @@
   import {getList as getDiy} from '@/api/user/diy'
   import PrintJs from 'print-js'
   import {activityList} from '@/api/pos/pos'
+  import putUpCom from '@/z/pos/cash/putUpCom'
+  import dayKnotsCom from '@/z/pos/cash/dayKnotsCom'
+
 
   export default {
     name: 'cash',
@@ -83,7 +89,7 @@
         return this.goodsList.reduce((t, d) => t + parseFloat(d.amount), 0)
       }
     },
-    components: {Sticky, inputGoods1, goodsListCom, searchStock, searchSale, searchVip, saleActivity, payment},
+    components: {Sticky, inputGoods1, goodsListCom, searchStock, searchSale, searchVip, saleActivity, payment, putUpCom, dayKnotsCom},
     directives: {permission},
     filters: {},
     data() {
@@ -104,12 +110,17 @@
         //货品列表
         goodsList: [],
         lastEmploy: {id: '', name: '', code: ''},
+        lastPoint: {id: '', code: ''},
         diyValues: [],
         //会员
         vip: {id: '', name: '', code: ''},
         showPayment: false,
         //促销活动
-        totalActivityList: []
+        totalActivityList: [],
+        //挂单
+        showPuUp: false,
+        //日结
+        showDayKnots: false
       }
     },
     created() {
@@ -121,7 +132,7 @@
           this.init()
         }
       }).finally(() => this.loadingChannelList = false)
-      getDiy({type:'POS_CASH_LIST'}).then(response => this.diyValues = response.data)
+      getDiy({type: 'POS_CASH_LIST'}).then(response => this.diyValues = response.data)
     },
     methods: {
       //点击TAB页
@@ -148,6 +159,8 @@
         goods.employId = this.lastEmploy.id
         goods.employCode = this.lastEmploy.code
         goods.employName = this.lastEmploy.name
+        goods.pointId = this.lastPoint.id
+        goods.pointCode = this.lastPoint.code
         goods.amount = goods.stockCount = 0
         goods.isVipDiscount = goods.isDiyPrice = false
         goods.vipDiscount = 1
@@ -324,8 +337,18 @@
         this.$refs.goodsListCom.init()
         this.$refs.searchVip.init()
         this.goodsList = []
+        this.vip = {id: '', name: '', code: ''}
         this.lastEmploy = {id: '', name: '', code: ''}
+        this.lastPoint = {id: '', code: ''}
         this.getAllActivity()
+      },
+      putUpBack(json) {
+        this.init()
+        if (json.goodsList != null) {
+          this.goodsList = json.goodsList
+          this.vip = json.vip
+          this.doSetAllGoods()
+        }
       }
     }
   }

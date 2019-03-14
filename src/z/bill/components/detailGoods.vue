@@ -68,7 +68,7 @@
       </el-table>
     </el-row>
 
-    <pagination :total="list.length" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.pageSize"/>
+    <pagination v-if="list.length != null" :total="list.length" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.pageSize"/>
 
     <el-dialog title="货品详情" :visible.sync="dialogFormShow" width="85%">
       <el-table

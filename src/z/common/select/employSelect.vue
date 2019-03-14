@@ -19,10 +19,10 @@
       };
     },
     props: {
-      employId: {default: ''},
-      employName: {default: ''},
-      employCode: {default: ''},
-      isDisabled: {default: false}
+      employId: {default: '',required: false},
+      employName: {default: '',required: false},
+      employCode: {default: '',required: false},
+      isDisabled: {default: false,required: false}
     },
     watch: {
       employId: 'initEmploy'
@@ -34,7 +34,7 @@
       initEmploy() {
         this.tempEmployId = this.employId
         this.optionEmploy = []
-        if (this.employId != '') {
+        if (this.employId != null && this.employId != '') {
           this.optionEmploy.push({id: this.employId, name: this.employName, code: this.employCode})
         }
       },

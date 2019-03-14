@@ -33,6 +33,7 @@
       <delete-button v-permission="'bill_warehouse_cjlh_delete'" :list-loading.sync="listLoading" bill-type="supplier2warehouse" :selected-ids="selectedIds" @get-list="getList"/>
       <el-button v-permission="'bill_warehouse_cjlh_import'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-upload2" @click="importDialogVisible = true" :disabled="listLoading">导入</el-button>
       <el-button v-permission="'bill_warehouse_cjlh_export'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="exportDialogVisible = true" :disabled="listLoading || total ==  0">导出</el-button>
+      <el-button v-permission="'bill_warehouse_cjlh_print'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-printer" @click="printDialogVisible = true" :disabled="listLoading || selectedIds.length !=  1">打印</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -133,6 +134,8 @@
 
     <import-dialog :show.sync="importDialogVisible" bill-type="supplier2warehouse" bill-key="s2w" @get-list="getList"/>
 
+    <print-dialog :show.sync="printDialogVisible" :selected-ids="selectedIds" bill-type="supplier2Warehouse"/>
+
   </div>
 </template>
 
@@ -148,11 +151,12 @@
   import addButton from '@/z/bill/components/addButton'
   import permission from '@/directive/permission/index.js'
   import {getList as getDiy} from '@/api/user/diy'
+  import printDialog from '@/z/bill/components/printDialog'
 
   export default {
     name: 'supplier2warehouse',
     components: {
-      Pagination, auditDialog, unAuditDialog, exportDialog, importDialog, deleteButton, editButton, addButton
+      Pagination, auditDialog, unAuditDialog, exportDialog, importDialog, deleteButton, editButton, addButton,printDialog
     },
     filters: {},
     directives: { permission },
@@ -184,6 +188,8 @@
         exportDialogVisible: false,
         //导入
         importDialogVisible: false,
+        //打印
+        printDialogVisible: false,
         //偏好
         diyValues: []
       }

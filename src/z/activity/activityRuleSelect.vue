@@ -1,8 +1,7 @@
 <template>
   <div>
     <div class="filter-container">
-      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="addOneRow" :loading="listLoading">增加一行
-      </el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="addOneRow" :loading="listLoading">增加一行</el-button>
     </div>
 
     <el-row :gutter="20">

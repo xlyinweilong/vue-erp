@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="导入" :visible.sync="show" width="35%" @close="onClose">
+  <el-dialog title="导入" :visible="show" width="35%" @close="onClose">
     <el-form>
       <el-form-item :label="importStatus.status != 0 ? '请选择文件' : '正在处理'">
         <el-upload class="upload-demo" ref="upload" :action="importAction" accept=".xlsx" :auto-upload="false" :limit="1" :file-list="importFileList" :headers="importHeaders" :on-success="importFileBack">
@@ -27,7 +27,7 @@
 
 <script>
   import {getToken} from '@/utils/auth'
-  import {uploadStatus} from '@/api/info/goods'
+  import {getStatus} from '@/api/common/upload'
 
   export default {
     computed: {},
@@ -40,9 +40,10 @@
       };
     },
     props: {
-      importAction: {default: ''},
-      downloadTemplateUrl: {default: ''},
-      show: {default: false},
+      importAction: {default: '',required: false},
+      downloadTemplateUrl: {default: '',required: false},
+      show: {default: false,required: false},
+      typeKey:{default: '',required: false}
     },
     methods: {
       //下载模板
@@ -62,7 +63,7 @@
         this.importUseTime.start = new Date()
       },
       uploadStatus() {
-        uploadStatus().then(response => {
+        getStatus({key: this.typeKey}).then(response => {
           let data = response.data
           if (data == null) {
             this.importStatus.status = 0
@@ -75,7 +76,7 @@
           } else if (data.status === 1) {
             this.importUseTime.useTime = (new Date().getTime() - this.importUseTime.start.getTime()) / 1000
             this.$message({message: "上传成功", type: 'success'})
-            this.getList()
+            this.$emit('get-list', {data: data.data})
             setTimeout(() => this.importDialogVisible = false, 3000)
           } else if (data.status === -1) {
             this.importUseTime.useTime = (new Date().getTime() - this.importUseTime.start.getTime()) / 1000

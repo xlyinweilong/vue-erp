@@ -39,11 +39,11 @@
             </el-row>
 
             <el-row :gutter="20">
-              <!--<el-col :span="6">-->
-              <!--<el-form-item label="商场扣点" prop="points">-->
-              <!--<el-input-number style="width: 100%" v-model="form.points" :min="0" :max="1" :precision="3" :step="0.01" label="输入0到1的小数"></el-input-number>-->
-              <!--</el-form-item>-->
-              <!--</el-col>-->
+              <el-col :span="6">
+                <el-form-item label="商场扣点" prop="points">
+                  <point-select style="width: 100%" :pointId.sync="form.marketPointId" :pointCode.sync="form.marketPointCode" :isDisabled="isDetail"/>
+                </el-form-item>
+              </el-col>
               <el-col :span="6">
                 <el-form-item label="活动开始时间" prop="startDate">
                   <el-date-picker style="width: 100%" v-model="form.startDate" type="datetime" format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期"/>
@@ -55,9 +55,9 @@
                 </el-form-item>
               </el-col>
               <el-col :span="6">
-                <el-form-item label="特定星期">
+                 <el-form-item label="特定星期">
                   <el-select v-model="form.executeWeek" placeholder="请选择" style="width: 100%" filterable multiple default-first-option>
-                    <el-option v-for="item in [1,2,3,4,5,6,7]" :label="item" :value="item"/>
+                    <el-option v-for="item in ['1','2','3','4','5','6','7']" :label="item" :value="item"/>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -158,14 +158,16 @@
   import activityRuleSelect from '@/z/activity/activityRuleSelect'
   import activityRulePricePromotionSelect from '@/z/activity/activityRulePricePromotionSelect'
   import {backUrl} from '@/z/common/commonMethod'
+  import pointSelect from '@/z/common/select/pointSelect'
 
   export default {
     name: 'activity_detail',
     components: {
-      Sticky, activityChannelSelect, activityVipSelect, activityGoodsSelect, activityRuleSelect, activityRulePricePromotionSelect
+      Sticky, activityChannelSelect, activityVipSelect, activityGoodsSelect, activityRuleSelect, activityRulePricePromotionSelect, pointSelect
     },
     data() {
       return {
+        isDetail: false,
         form: {
           id: '',
           code: '',
@@ -177,7 +179,10 @@
           joinVipType: 'ALL',
           vipDiscountType: 'DOUBLE_DISCOUNT',
           joinGoodsType: 'APPOINT',
-          ruleType: 'QUANTITY'
+          ruleType: 'QUANTITY',
+          marketPointId:'',
+          marketPointCode:'',
+          executeWeek:[]
         },
         rules: {
           name: [{required: true, message: '必填字段', trigger: 'blur'}],
@@ -204,6 +209,9 @@
         getInfo({id: id}).then(response => {
           this.loading = false
           this.form = response.data
+          if(this.form.executeWeek == null){
+            this.form.executeWeek = []
+          }
           this.channelList = response.data.activityChannelList
           this.vipList = response.data.activityVipList
           this.conditionGoodsList = response.data.activityConditionGoodsList

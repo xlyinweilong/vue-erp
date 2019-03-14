@@ -20,6 +20,11 @@
                 </el-form-item>
               </el-col>
               <el-col :span="6">
+                <el-form-item label="扣点" prop="marketPointId">
+                  <point-select style="width: 100%" ref="marketPoint" :pointId.sync="form.marketPointId" :pointCode.sync="form.marketPointCode" :isDisabled="isDetail"/>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
                 <el-form-item label="组" prop="groupId">
                   <el-select :disabled="isDetail" v-model="form.groupId" filterable clearable remote default-first-option placeholder="请输入关键词" :remote-method="searchGroup" :loading="searchTextLoading" style="width: 100%">
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
@@ -66,10 +71,11 @@
   import {getDictList} from '@/api/info/dict'
   import {getAll} from '@/api/config/config'
   import {backUrl} from '@/z/common/commonMethod'
+  import pointSelect from '@/z/common/select/pointSelect'
 
   export default {
     name: 'channel_detail',
-    components: {Sticky},
+    components: {Sticky, pointSelect},
     data() {
       return {
         form: {
@@ -79,11 +85,12 @@
           groupId: '',
           //配置
           channelConfigList: [],
-          channelConfigChannelList:[]
+          channelConfigChannelList: []
         },
         rules: {
           code: [{required: true, message: '必填字段', trigger: 'blur'}],
-          name: [{required: true, message: '必填字段', trigger: 'blur'}]
+          name: [{required: true, message: '必填字段', trigger: 'blur'}],
+          marketPointId: [{required: true, message: '必填字段', trigger: 'blur'}]
         },
         loading: false,
         activeName: 'BASE',
@@ -108,7 +115,7 @@
             this.form = response.data
             this.channelConfigList.forEach(r => {
               let channelConfig = this.form.channelConfigChannelList.find(c => c.configId === r.id)
-              if(channelConfig != null){
+              if (channelConfig != null) {
                 r.defaultValue = channelConfig.defaultValue
               }
             })

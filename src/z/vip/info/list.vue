@@ -138,6 +138,8 @@
         <el-button type="primary" @click="saveData" :loading="saving || (dialogStatus !='create' && temp.id == null)">确定</el-button>
       </div>
     </el-dialog>
+
+    <commonUpload :show.sync="importDialogVisible" :downloadTemplateUrl="'/static/download/vip/vip_info.xlsx'" :importAction="importAction" :typeKey="'vip_info'" @get-list="getList"/>
   </div>
 </template>
 
@@ -149,11 +151,12 @@
   import {initDate} from '@/z/bill/components/commonMethod'
   import employSelect from '@/z/common/select/employSelect'
   import channelSelect from '@/z/common/select/channelSelect'
+  import commonUpload from '@/z/common/upload/commonUpload'
 
   export default {
     name: 'vip_info',
     components: {
-      Pagination, employSelect, channelSelect
+      Pagination, employSelect, channelSelect,commonUpload
     },
     directives: {permission},
     filters: {},
@@ -176,7 +179,9 @@
         dialogStatus: '',
         dialogFormVisible: false,
         saving: false,
-        gradeList: []
+        gradeList: [],
+        importDialogVisible:false,
+        importAction: process.env.BASE_API + '/api/vip/vip/upload',
       }
     },
     created() {

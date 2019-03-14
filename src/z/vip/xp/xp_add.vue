@@ -122,7 +122,7 @@
   import {getList as getGradeList} from '@/api/vip/grade'
   import Pagination from '@/components/Pagination'
   import permission from '@/directive/permission/index.js'
-  import {initDate} from '@/z/bill/components/commonMethod'
+  import {initDateTime} from '@/z/bill/components/commonMethod'
   import employSelect from '@/z/common/select/employSelect'
   import channelSelect from '@/z/common/select/channelSelect'
 
@@ -183,7 +183,7 @@
       },
       //弹出框新增
       createElement() {
-        this.temp = {id: '', name: '', vipGradeId: '', startDate: initDate(), xp: 1, priority: 0}
+        this.temp = {id: '', name: '', vipGradeId: '', startDate: initDateTime(), xp: 1, priority: 0}
         if(this.gradeList.length > 0){
           this.temp.vipGradeId = this.gradeList[0].id
         }

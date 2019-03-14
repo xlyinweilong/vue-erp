@@ -38,11 +38,11 @@
           <el-tag :type="scope.row.indexDepth == null ? 'info': 'success'" v-text="scope.row.indexDepth == null ? '未设置' : '已设置'"></el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="默认等级" align="center">
-        <template slot-scope="scope">
-          <el-switch v-model="scope.row.defaultGrade" active-color="#13ce66" :disabled="scope.row.indexDepth == null || scope.row.defaultGrade" @change="setDefaultGrade(scope.row.id)"/>
-        </template>
-      </el-table-column>
+      <!--<el-table-column label="默认等级" align="center">-->
+      <!--<template slot-scope="scope">-->
+      <!--<el-switch v-model="scope.row.defaultGrade" active-color="#13ce66" :disabled="scope.row.indexDepth == null || scope.row.defaultGrade" @change="setDefaultGrade(scope.row.id)"/>-->
+      <!--</template>-->
+      <!--</el-table-column>-->
     </el-table>
 
     <el-dialog :title="dialogStatus==='create' ? '新增' : (temp.id == null ? '加载中...':'修改')" :visible.sync="dialogFormVisible">
@@ -124,11 +124,8 @@
         this.temp = {id: '', name: '', discount: 1}
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
-        this.$nextTick(() => {
-          this.$refs['gradeForm'].clearValidate()
-        })
-        setTimeout(() => this.$refs.gradeName.$el.querySelector('input').focus(), 200)
-
+        this.$nextTick(() => this.$refs['gradeForm'].clearValidate())
+        this.$nextTick(() => this.$refs.gradeName.focus())
       },
       //弹出框修改
       updateElement() {

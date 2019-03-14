@@ -33,6 +33,7 @@
       <el-button v-permission="'bill_warehouse_ckpd_import'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-upload2" @click="importDialogVisible = true" :disabled="listLoading">导入</el-button>
       <el-button v-permission="'bill_warehouse_ckpd_export'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="exportDialogVisible = true" :disabled="listLoading || total ==  0">导出</el-button>
       <el-button v-permission="'bill_warehouse_ckpd_pd'" class="filter-item" style="margin-left: 10px;" type="warning" icon="el-icon-edit-outline" @click="inventoryDialogVisible = true" :disabled="listLoading || total ==  0">盘点</el-button>
+      <el-button v-permission="'bill_warehouse_ckpd_print'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-printer" @click="printDialogVisible = true" :disabled="listLoading || selectedIds.length !=  1">打印</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -120,6 +121,8 @@
 
     <inventory-dialog :show.sync="inventoryDialogVisible" bill-type="warehouse_inventory" @get-list="getList"/>
 
+    <print-dialog :show.sync="printDialogVisible" :selected-ids="selectedIds" bill-type="warehouseInventory"/>
+
   </div>
 </template>
 
@@ -136,11 +139,12 @@
   import permission from '@/directive/permission/index.js'
   import inventoryDialog from '@/z/bill/components/inventoryDialog'
   import {getList as getDiy} from '@/api/user/diy'
+  import printDialog from '@/z/bill/components/printDialog'
 
   export default {
     name: 'warehouse_inventory',
     components: {
-      Pagination, auditDialog, unAuditDialog, exportDialog, importDialog, deleteButton, editButton, addButton,inventoryDialog
+      Pagination, auditDialog, unAuditDialog, exportDialog, importDialog, deleteButton, editButton, addButton,inventoryDialog,printDialog
     },
     directives: { permission },
     filters: {},
@@ -174,6 +178,8 @@
         importDialogVisible: false,
         //盘点
         inventoryDialogVisible:false,
+        //打印
+        printDialogVisible: false,
         //偏好
         diyValues: []
       }

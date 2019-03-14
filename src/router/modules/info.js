@@ -181,7 +181,13 @@ const infoRouter = {
       name: 'employ_detail',
       hidden: true,
       meta: {title: '员工资料-详情'}
-    }
+    },
+    {
+      path: 'market_point',
+      component: () => import('@/z/info/marketPoint/list'),
+      name: 'market_point',
+      meta: {title: '商场结算码',power: 'info_market_point'}
+    },
   ]
 }
 export default infoRouter

@@ -25,7 +25,7 @@
         </el-select>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('goods_name') > -1" label="货品名称" align="center" width="200%">
+    <el-table-column v-if="diyValues.indexOf('goods_name') > -1" label="货品名称" align="center" width="200%">
       <template slot-scope="scope">
         <span>{{ scope.row.goodsName }}</span>
       </template>
@@ -45,9 +45,69 @@
         <span>{{ scope.row.goodsSizeName }}</span>
       </template>
     </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_brand') > -1" label="品牌" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.brandName }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_category') > -1" label="类别" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.categoryName }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_category2') > -1" label="二级类别" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.categoryName2 }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_series') > -1" label="系列" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.seriesName }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_pattern') > -1" label="款型" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.patternName }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_style') > -1" label="风格" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.styleName }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_season') > -1" label="季节" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.seasonName }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_year') > -1" label="年份" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.yearName }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_sex') > -1" label="性别" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.sexName }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_supplier_code') > -1" label="供应商编号" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.supplierCode }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.indexOf('goods_supplier_name') > -1" label="供应商名称" align="center">
+      <template slot-scope="scope">
+        <span>{{ scope.row.supplierName }}</span>
+      </template>
+    </el-table-column>
     <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('tag_price') > -1" label="吊牌价" align="center" width="70%">
       <template slot-scope="scope">
         <span>{{ scope.row.tagPrice }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('sale_price') > -1" label="零售价" align="center" width="70%">
+      <template slot-scope="scope">
+        <span>{{ scope.row.salePrice }}</span>
       </template>
     </el-table-column>
     <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('bill_count') > -1" label="数量" align="center" width="50%">
@@ -80,6 +140,15 @@
         </el-select>
       </template>
     </el-table-column>
+    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('market_point') > -1" label="结算码" align="center" width="200%">
+      <template slot-scope="scope">
+        <el-select v-model="scope.row.pointId" filterable clearable remote default-first-option placeholder="请输入商场扣点码" :remote-method="searchPoint" @change="changePoint(scope.row)" :loading="loadingPoint" style="width: 100%">
+          <i slot="prefix" class="el-input__icon el-icon-search"></i>
+          <el-option v-for="item in optionPoint" :value="item.id" :label="item.code"/>
+          <el-option v-if="scope.row.pointId != '' && scope.row.pointId != null && optionPoint.every(e => e.id != scope.row.pointId)" :value="scope.row.pointId" :label="scope.row.pointCode"/>
+        </el-select>
+      </template>
+    </el-table-column>
     <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('stock_count') > -1" label="库存" align="center" width="50%">
       <template slot-scope="scope">
         <span>{{ scope.row.stockCount }}</span>
@@ -101,13 +170,18 @@
 <script>
   import {getList as getEmployList} from '@/api/info/employ'
   import {activityList} from '@/api/pos/pos'
+  import pointSelect from '@/z/common/select/pointSelect'
+  import {getList as getPointList} from '@/api/info/marketPoint'
 
   export default {
     computed: {},
+    components: {pointSelect},
     data() {
       return {
         loadingEmploy: false,
-        optionEmploy: []
+        optionEmploy: [],
+        loadingPoint: false,
+        optionPoint: [],
       };
     },
     props: {
@@ -125,6 +199,9 @@
       },
       diyValues: {
         default: []
+      },
+      lastPoint: {
+        default: {}
       }
     },
     watch: {},
@@ -144,6 +221,34 @@
           return status
         } else {
           return '退货'
+        }
+      },
+      //查询结算码
+      searchPoint(query) {
+        if (query !== '') {
+          this.loadingPoint = true
+          getPointList({pageIndex: 1, pageSize: 10, searchKey: query}).then(response => {
+            this.optionPoint = response.data.content
+          }).finally(() => this.loadingPoint = false)
+        } else {
+          this.optionPoint = []
+        }
+      },
+      //修改结算码
+      changePoint(row) {
+        if (row.pointId != null && row.pointId != '') {
+          let point = this.optionPoint.find(e => e.id === row.pointId)
+          row.pointName = point.name
+          row.pointCode = point.code
+          this.goodsList.filter(g => g.pointId == null || g.pointId == '').forEach(g => {
+            g.pointId = row.pointId
+            g.pointName = row.pointName
+            g.pointCode = row.pointCode
+          })
+          this.$emit('update:lastPoint', {id: row.pointId, name: row.pointName, code: row.pointCode})
+        } else {
+          row.pointName = ''
+          row.pointCode = ''
         }
       },
       //查询员工
@@ -180,7 +285,7 @@
         row.isVipDiscount = false
         row.vipDiscount = 1
       },
-      doSetAllGoods(){
+      doSetAllGoods() {
         this.$emit('doSetAllGoods', "")
       }
     }

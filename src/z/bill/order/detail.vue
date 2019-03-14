@@ -32,7 +32,7 @@
             <el-row :gutter="20">
               <el-col :span="6">
                 <el-form-item label="仓库" prop="warehouseId">
-                  <el-select :disabled="isDetail" v-model="form.warehouseId" filterable clearable remote default-first-option placeholder="请输入仓库" :loading="loadingOptionWarehouseList" style="width: 100%" :remote-method="searchWarehouseOption">
+                  <el-select  v-model="form.warehouseId" filterable clearable remote default-first-option placeholder="请输入仓库" :loading="loadingOptionWarehouseList" style="width: 100%" :remote-method="searchWarehouseOption">
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
                     <el-option v-for="item in optionWarehouseList" :value="item.id" :label="item.name +'-'+item.code"/>
                   </el-select>
@@ -40,7 +40,7 @@
               </el-col>
               <el-col :span="6">
                 <el-form-item label="渠道" prop="channelId">
-                  <el-select :disabled="isDetail" v-model="form.channelId" filterable clearable remote default-first-option placeholder="请输入渠道" :loading="loadingOptionChannelList" style="width: 100%" :remote-method="searchChannelOption">
+                  <el-select  v-model="form.channelId" filterable clearable remote default-first-option placeholder="请输入渠道" :loading="loadingOptionChannelList" style="width: 100%" :remote-method="searchChannelOption">
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
                     <el-option v-for="item in optionChannelList" :value="item.id" :label="item.name +'-'+item.code"/>
                   </el-select>

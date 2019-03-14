@@ -29,7 +29,7 @@
       <el-button v-permission="'info_goods_add'" class="filter-item" type="primary" icon="el-icon-plus" :disabled="listLoading" @click="$router.push({ path: '/info/goods_create'})">新增</el-button>
       <el-button v-permission="'info_goods_edit'" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="listLoading || selectedIds.length != 1" @click="updateElement">修改</el-button>
       <el-button v-permission="'info_goods_delete'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" :disabled="listLoading || selectedIds.length == 0">删除</el-button>
-      <el-button v-permission="'info_goods_import'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-upload2" @click="showImport" :disabled="listLoading">导入</el-button>
+      <el-button v-permission="'info_goods_import'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-upload2" @click="importDialogVisible = true" :disabled="listLoading">导入</el-button>
       <el-button v-permission="'info_goods_export'" class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-download" @click="exportDialogVisible = true" :disabled="listLoading || total ==  0">导出</el-button>
     </div>
     <el-table
@@ -132,30 +132,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="导入" :visible.sync="importDialogVisible" width="35%">
-      <el-form>
-        <el-form-item :label="importStatus.status != 0 ? '请选择文件' : '正在处理'">
-          <el-upload class="upload-demo" ref="upload" :action="importAction" accept=".xlsx" :auto-upload="false" :limit="1" :file-list="importFileList" :headers="importHeaders" :on-success="importFileBack">
-            <el-button v-show="importStatus.status != 0" slot="trigger" size="small" type="success">选取文件</el-button>
-            <div v-show="importStatus.status != 0" slot="tip" class="el-upload__tip">
-              <el-button type="text" @click="downloadTemplate">点击这里</el-button>
-              下载上传文件模板
-            </div>
-            <div slot="tip" class="el-upload__tip" v-show="importStatus.status > -2">
-              <span v-show="importStatus.status != -1 && importStatus.status != 1">文件上传成功，正在处理数据，请稍后...<br/></span>
-              <span v-show="importStatus.totalRowCount > 0">总计行数：{{importStatus.totalRowCount}}，当前进度：{{importStatus.nowRowCount}}<br/></span>
-              <span v-show="importStatus.status === 0 && importStatus.totalRowCount > 0 && importStatus.nowRowCount === importStatus.totalRowCount">正在尝试写入数据库，请稍等<br/></span>
-              <span v-show="importStatus.status === -1">处理失败，用时：{{importUseTime.useTime}}秒，请<el-button type="text" @click="downloadImportErrorFile">点击这里</el-button>下载失败文件</span>
-              <span v-show="importStatus.status === 1">处理完成，用时：{{importUseTime.useTime}}秒</span>
-            </div>
-          </el-upload>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="importDialogVisible = false" :disabled="importStatus.status === 0">取消</el-button>
-        <el-button type="primary" @click="submitUpload" :loading="importStatus.status === 0">导入</el-button>
-      </div>
-    </el-dialog>
+    <commonUpload :show.sync="importDialogVisible" :downloadTemplateUrl="'/static/download/goods/goods.xlsx'" :importAction="importAction" :typeKey="'goods'" @get-list="getList"/>
   </div>
 </template>
 
@@ -166,10 +143,11 @@
   import Pagination from '@/components/Pagination'
   import {param, urlEncode} from '@/utils'
   import permission from '@/directive/permission/index.js'
+  import commonUpload from '@/z/common/upload/commonUpload'
 
   export default {
     name: 'goods',
-    components: {Pagination},
+    components: {Pagination,commonUpload},
     directives: { permission },
     filters: {},
     data() {
@@ -202,11 +180,7 @@
         exportDialogType: 'BASE',
         //导入
         importDialogVisible: false,
-        importAction: process.env.BASE_API + '/api/info/goods/upload_goods',
-        importFileList: [],
-        importHeaders: {'X-Token': getToken()},
-        importStatus: {totalRowCount: 0, nowRowCount: 0, status: -2},
-        importUseTime: {start: new Date(), useTime: 0}
+        importAction: process.env.BASE_API + '/api/info/goods/upload_goods'
       }
     },
     created() {
@@ -247,54 +221,6 @@
       //导出
       exportElement() {
         window.open(process.env.BASE_API + "/api/info/goods/export?token=" + getToken() + urlEncode({type: this.exportDialogType}))
-      },
-      //下载模板
-      downloadTemplate() {
-        window.open(process.env.BASE_API + "/static/download/goods/goods.xlsx")
-      },
-      showImport() {
-        this.importFileList = []
-        if (this.importStatus.status == 1) {
-          this.importStatus = {totalRowCount: 0, nowRowCount: 0, status: -2}
-        }
-        this.importDialogVisible = true
-      },
-      submitUpload() {
-        this.importStatus = {totalRowCount: 0, nowRowCount: 0, status: -2}
-        this.$refs.upload.submit()
-        this.importUseTime.start = new Date()
-      },
-      uploadStatus() {
-        uploadStatus().then(response => {
-          let data = response.data
-          if (data == null) {
-            this.importStatus.status = 0
-            setTimeout(() => this.uploadStatus(), 2000)
-            return
-          }
-          this.importStatus = data
-          if (data.status === 0) {
-            setTimeout(() => this.uploadStatus(), 2000);
-          } else if (data.status === 1) {
-            this.importUseTime.useTime = (new Date().getTime() - this.importUseTime.start.getTime()) / 1000
-            this.$message({message: "上传成功", type: 'success'})
-            this.getList()
-            setTimeout(() => this.importDialogVisible = false, 3000)
-          } else if (data.status === -1) {
-            this.importUseTime.useTime = (new Date().getTime() - this.importUseTime.start.getTime()) / 1000
-            this.$message.error("上传失败，请查看错误文件")
-          } else {
-            this.$message.error("系统异常")
-          }
-        })
-      },
-      importFileBack() {
-        this.uploadStatus()
-        this.importStatus.status = 0
-        this.importFileList = []
-      },
-      downloadImportErrorFile() {
-        window.open(process.env.BASE_API + "/download/" + getToken() + ".xlsx")
       }
     }
   }

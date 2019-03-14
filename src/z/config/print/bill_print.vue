@@ -12,7 +12,8 @@
         纸张类型
         <el-select v-model="paperType" placeholder="请选择">
           <el-option :label="'A4'" :value="'A4'"></el-option>
-          <el-option :label="'68'" :value="'68'"></el-option>
+          <el-option :label="'80'" :value="'80'"></el-option>
+          <el-option :label="'58'" :value="'58'"></el-option>
         </el-select>
       </el-card>
       <el-row :gutter="20">
@@ -31,6 +32,7 @@
 
   import {getAll, save} from '@/api/config/config'
   import Sticky from '@/components/Sticky'
+
 
   export default {
     name: 'bill_print_config',

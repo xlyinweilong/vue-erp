@@ -51,10 +51,10 @@
     <el-dialog :title="dialogStatus==='create' ? '新增' : (temp.id == null ? '加载中...':'修改')" :visible.sync="dialogFormVisible">
       <el-form ref="dictForm" :rules="rules" :model="temp" v-loading="saving || (dialogStatus !='create' && temp.id == null)">
         <el-form-item v-if="showType === 1" label="编号" prop="code">
-          <el-input v-model.trim="temp.code" @keyup.enter.native="saveData" />
+          <el-input v-model.trim="temp.code" @keyup.enter.native="saveData"/>
         </el-form-item>
         <el-form-item label="名称" prop="name">
-          <el-input v-model.trim="temp.name" @keyup.enter.native="saveData" />
+          <el-input v-model.trim="temp.name" @keyup.enter.native="saveData"/>
         </el-form-item>
         <el-form-item v-if="showType == 3">
           <el-button @click="addSize" type="primary">新增尺码</el-button>
@@ -66,7 +66,7 @@
             <el-table-column align="center" label="尺码">
               <template slot-scope="scope">
                 <template>
-                  <el-input placeholder="请输入尺码" v-model.trim="scope.row.name"  @keyup.enter.native="saveData"></el-input>
+                  <el-input placeholder="请输入尺码" v-model.trim="scope.row.name" @keyup.enter.native="saveData"></el-input>
                 </template>
               </template>
             </el-table-column>
@@ -95,7 +95,7 @@
   export default {
     name: 'baseGoods',
     components: {Pagination},
-    directives: { permission },
+    directives: {permission},
     filters: {},
     data() {
       return {
@@ -226,13 +226,10 @@
             }
             this.saving = true
             saveDict(this.temp).then(response => {
-              this.saving = false
               this.dialogFormVisible = false
               this.$message({message: response.message, type: 'success'})
               this.getList()
-            }).catch((err) => {
-              this.saving = false
-            })
+            }).finally(() => this.saving = false)
           }
         })
       },

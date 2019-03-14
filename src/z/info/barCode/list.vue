@@ -58,7 +58,7 @@
     </el-table>
     <pagination v-show="total>0 && !listLoading" :total="total" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.pageSize" @pagination="getList"/>
 
-    <commonUpload :show.sync="importDialogVisible" :downloadTemplateUrl="'/static/download/barCode/barCode.xlsx'" :importAction="importAction"/>
+    <commonUpload :show.sync="importDialogVisible" :downloadTemplateUrl="'/static/download/barCode/barCode.xlsx'" :importAction="importAction" :typeKey="'barcode'" @get-list="getList"/>
   </div>
 </template>
 
@@ -86,8 +86,8 @@
         list: null,
         total: 0,
         listLoading: true,
-        importDialogVisible:false,
-        importAction: process.env.BASE_API + '/api/info/goods/upload_goods',
+        importDialogVisible: false,
+        importAction: process.env.BASE_API + '/api/info/barCode/upload',
       }
     },
     created() {

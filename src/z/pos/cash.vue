@@ -58,7 +58,7 @@
       </el-tabs>
     </div>
     <putUpCom :show.sync="showPuUp" :goodsList="goodsList" :vip="vip" @callBack="putUpBack"/>
-    <dayKnotsCom :show.sync="showDayKnots" @callBack="putUpBack"/>
+    <dayKnotsCom :show.sync="showDayKnots" :channelId="channelId" @callBack="putUpBack"/>
   </div>
 </template>
 

@@ -284,6 +284,7 @@
         row.isDiyPrice = true
         row.isVipDiscount = false
         row.vipDiscount = 1
+        this.doSetAllGoods()
       },
       doSetAllGoods() {
         this.$emit('doSetAllGoods', "")

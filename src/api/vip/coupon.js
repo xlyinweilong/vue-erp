@@ -39,3 +39,28 @@ export function deleteEle(data) {
   })
 }
 
+/**
+ * 我的列表
+ *
+ * @param params
+ */
+export function getMyList(params) {
+  return request({
+    url: 'api/vip/coupon/my_list',
+    method: 'get',
+    params: params
+  })
+}
+
+/**
+ * 查询可用的代用卷
+ *
+ * @param params
+ */
+export function findByCodeForCanUse(params) {
+  return request({
+    url: 'api/vip/coupon/find_by_code_for_can_use',
+    method: 'get',
+    params: params
+  })
+}

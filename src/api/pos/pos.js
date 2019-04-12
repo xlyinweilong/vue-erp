@@ -69,3 +69,16 @@ export function getPosList(data) {
     data
   })
 }
+
+/**
+ * 查询我得POS单据
+ *
+ * @param params
+ */
+export function findMyPosBill(params) {
+  return request({
+    url: 'api/pos/cash/find_my_pos_bill',
+    method: 'get',
+    params: params
+  })
+}

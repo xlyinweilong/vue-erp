@@ -4,16 +4,15 @@
     :visible="show"
     @close="onClose"
     @open="onOpen"
-    v-loading="listLoading"
     width="55%">
     <el-row :gutter="20" style="margin-bottom: 20px">
-      <el-col :span="8"><b style="font-size:18px">总计：{{totalAmount}}</b></el-col>
-      <el-col :span="8"><b style="font-size:18px;" :style="toBePaid > 0 ? 'color:#F56C6C' : ''">待支付：{{toBePaid}}</b></el-col>
-      <el-col :span="8"><b style="font-size:18px" :style="giveChange > 0 ? 'color:#F56C6C' : ''">找零：{{giveChange}}</b></el-col>
+      <el-col :span="6"><b style="font-size:18px">支付总计：{{totalAmount}}</b></el-col>
+      <el-col :span="6"><b style="font-size:18px;">需要退回：{{totalBackAmount}}</b></el-col>
+      <el-col :span="6"><b style="font-size:18px;">当前退回：{{paid}}</b></el-col>
+      <el-col :span="6"><b style="font-size:18px" :style="toBePaid != 0 ? 'color:#F56C6C' : ''">待退回：{{toBePaid}}</b></el-col>
     </el-row>
     <el-form ref="form" label-width="100px" style="padding-bottom: 0px;">
-      <el-form-item v-for="payment in paymentList" v-if="payment.startUp === 1" :label="payment.name+'：'" style="margin-bottom: 8px;" v-show="vip.id != '' || (payment.sysType != 'INTEGRAL' && payment.sysType != 'BALANCE')">
-
+      <el-form-item v-for="payment in paymentList" :label="payment.paymentName+'：'" style="margin-bottom: 8px;">
         <el-row :gutter="24" v-if="payment.sysType === 'BALANCE'" style="margin-left: 0px; margin-right: 0px;">
           <el-col :span="12" style="padding-left: 0px;">账户余额:{{vip.balance}}</el-col>
           <el-col :span="12" style="padding-right: 0px;">
@@ -42,7 +41,15 @@
           </el-col>
         </el-row>
 
-        <el-input-number @change="changeInputNumber(payment)" v-if="payment.sysType != 'BALANCE' && payment.sysType != 'INTEGRAL' && payment.sysType != 'COUPON'" style="width: 100%" v-model="payment.amount" :controls="false" :precision="2"></el-input-number>
+        <el-row :gutter="24" v-if="payment.sysType != 'BALANCE' && payment.sysType != 'INTEGRAL' && payment.sysType != 'COUPON'" style="margin-left: 0px; margin-right: 0px;">
+          <el-col :span="12" style="padding-left: 0px;">
+            <el-input-number style="width: 100%" v-model="payment.amount" :controls="false" :precision="2" :min="0" :max="payment.oldAmount"></el-input-number>
+          </el-col>
+          <el-col :span="12" style="padding-right: 0px;">
+            <el-input-number :disabled="true" style="width: 100%" v-model="payment.oldAmount" :controls="false" :precision="2"></el-input-number>
+          </el-col>
+        </el-row>
+
       </el-form-item>
       <el-table v-show="couponList.length > 0"
                 :data="couponList"
@@ -65,21 +72,12 @@
           width="80"
           label="金额">
         </el-table-column>
-        <el-table-column
-          label="操作"
-          width="60">
-          <template slot-scope="scope">
-            <el-button @click="deleteCoupon(scope.row)" type="text">删除</el-button>
-          </template>
-        </el-table-column>
       </el-table>
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="onClose" :loading="loading">关闭</el-button>
-      <el-button type="primary" v-show="vip.id != ''" @click="showCoupon = true" plain :loading="loading">代用卷</el-button>
       <el-button type="primary" @click="pay" :disabled="toBePaid !== 0" :loading="loading">确定</el-button>
     </span>
-    <coupon :show.sync="showCoupon" :vip="vip" :couponList="couponList" @updateCouponList="updateCouponList"/>
   </el-dialog>
 </template>
 <script>
@@ -89,25 +87,19 @@
 
   export default {
     computed: {
+      totalAmount() {
+        return this.paymentList.filter(p => p.oldAmount != null).reduce((t, d) => t + parseFloat(d.oldAmount), 0)
+      },
       paid() {
         return this.paymentList.filter(p => p.amount != null).reduce((t, d) => t + parseFloat(d.amount), 0)
       },
       toBePaid() {
-        return this.paid > this.totalAmount ? 0 : this.totalAmount - this.paid
+        return this.totalBackAmount - this.paid
       },
-      giveChange() {
-        let cashPayment = this.paymentList.find(p => p.sysType === 'CASH')
-        if (cashPayment != null && cashPayment.amount > 0) {
-          return this.paid > this.totalAmount ? this.paid - this.totalAmount : 0
-        }
-        return 0
-      }
     },
     components: {coupon},
     data() {
       return {
-        listLoading: false,
-        paymentList: [],
         showCoupon: false,
         couponCode: '',
         coupon: {id: ''},
@@ -115,38 +107,20 @@
       }
     },
     props: {
-      vip: {default: {id: '', name: ''}},
+      paymentList: {default: []},
+      vip: {default: {}},
       show: {default: false},
-      totalAmount: {default: 0},
+      totalBackAmount: {default: 0},
       loading: {default: false},
     },
     created() {
-      this.getPaymentList()
     },
     watch: {},
     methods: {
-      changeInputNumber(payment) {
-        if (payment.sysType !== 'CASH') {
-          let cashPayment = this.paymentList.find(p => p.sysType === 'CASH')
-          if (this.giveChange > 0 && cashPayment.amount > 0) {
-            cashPayment.amount = cashPayment.amount > this.giveChange ? (cashPayment.amount - this.giveChange) : 0
-          }
-        }
-      },
       init() {
 
       },
-      getPaymentList() {
-        this.listLoading = true
-        getList({pageIndex: 1, pageSize: 100}).then(response => {
-          response.data.forEach(p => p.amount = null)
-          this.paymentList = response.data
-        }).finally(() => this.listLoading = false)
-      },
       onOpen() {
-        this.couponList = []
-        this.paymentList.forEach(p => p.amount = null)
-        this.paymentList.filter(p => p.sysType === 'CASH').forEach(p => p.amount = this.totalAmount)
       },
       onClose() {
         this.$emit('update:show', false)
@@ -156,20 +130,6 @@
       },
       //查询代用卷
       searchCouponCode() {
-        this.listLoading = true
-        findByCodeForCanUse({code: this.couponCode, vipId: this.vip.id}).then(response => {
-          this.couponCode = ''
-          this.coupon = response.data
-          if (this.couponList.every(c => c.id != this.coupon.id)) {
-            this.couponList.unshift(this.coupon)
-            let paymentCoupon = this.paymentList.find(p => p.sysType === 'COUPON')
-            paymentCoupon.amount = this.couponList.reduce((t, d) => t + parseFloat(d.amount), 0)
-            let cashPayment = this.paymentList.find(p => p.sysType === 'CASH')
-            cashPayment.amount = 0
-            this.changeInputNumber(paymentCoupon)
-            this.$emit('updateCouponList', this.couponList)
-          }
-        }).finally(() => this.listLoading = false)
       },
       deleteCoupon(row) {
         let index = this.couponList.indexOf(row);

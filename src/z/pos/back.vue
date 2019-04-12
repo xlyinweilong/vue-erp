@@ -1,183 +1,133 @@
 <template>
-  <div class="app-container">
-    <div class="filter-container">
-      <el-input placeholder="关键词" v-model.trim="listQuery.searchKey" style="width: 200px;" class="filter-item" @keyup.enter.native="getList"/>
-      <el-button :loading="listLoading" class="filter-item" icon="el-icon-search" type="primary" @click="getList">查询</el-button>
-    </div>
-    <div class="filter-container">
-      <el-button v-permission="'user_user_add'" class="filter-item" type="primary" icon="el-icon-plus" @click="createElement" :disabled="listLoading">新增</el-button>
-      <el-button v-permission="'user_user_edit'" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="updateElement" :disabled="listLoading || selectedIds.length != 1">修改</el-button>
-      <el-button v-permission="'user_user_delete'" class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-delete" @click="deleteElement" :disabled="listLoading || selectedIds.length == 0">删除</el-button>
-    </div>
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      tooltip-effect="dark"
-      style="width: 100%"
-      @selection-change="selectionChange"
-      highlight-current-row
-      fit
-      border
-    >
-      <el-table-column type="selection" width="35"/>
-      <el-table-column label="用户名称" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.name }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="账号" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.account }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="角色" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.roleName }}</span>
-        </template>
-      </el-table-column>
-    </el-table>
-    <pagination v-show="total>0 && !listLoading" :total="total" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.pageSize" @pagination="getList"/>
+  <div>
+    <sticky class-name="sub-navbar draft">
+      <el-select class="filter-item" v-model="channelId" placeholder="请选择" style="width: 300px;" :disable="loadingChannelList" @change="changeChannel">
+        <el-option v-for="channel in channelList" :label="channel.name + '-' + channel.code" :value="channel.id"></el-option>
+      </el-select>
+    </sticky>
 
-    <el-dialog :title="dialogStatus==='create' ? '新增' : (temp.id == null ? '加载中...':'修改')" :visible.sync="dialogFormVisible">
-      <el-form ref="userForm" :rules="rules" :model="temp" v-loading="saving || (dialogStatus !='create' && temp.id == null)">
-        <el-form-item label="名称" prop="name">
-          <el-input v-model.trim="temp.name" @keyup.enter.native="saveData"/>
-        </el-form-item>
-        <el-form-item label="账号" prop="account">
-          <el-input v-model.trim="temp.account" @keyup.enter.native="saveData"/>
-        </el-form-item>
-        <el-form-item label="密码" prop="passwd">
-          <el-input type="password" v-model.trim="temp.passwd" @keyup.enter.native="saveData"/>
-        </el-form-item>
-        <el-form-item label="角色" prop="roleId">
-          <el-select v-model="temp.roleId" filterable clearable remote default-first-option placeholder="请输入角色名称" :loading="loadingOptionRoleList" style="width: 100%" :remote-method="searchRoleOption">
-            <i slot="prefix" class="el-input__icon el-icon-search"></i>
-            <el-option v-for="item in optionRoleList" :value="item.id" :label="item.name"/>
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">关闭</el-button>
-        <el-button type="primary" @click="saveData" :loading="saving || (dialogStatus !='create' && temp.id == null)">确定</el-button>
+    <div class="app-container">
+      <el-row :gutter="20" style="margin-bottom: 10px;">
+        <el-col :span="24">
+          <span>原单号：</span>
+          <el-input v-loading="loading" placeholder="请输入原单号" v-model.trim="billCode" style="width: 300px;" @keyup.enter.native="searchBill"><i slot="prefix" class="el-input__icon el-icon-search"></i></el-input>
+          <el-button type="primary" :loading="loading" @click="searchBill" plain>确定</el-button>
+        </el-col>
+      </el-row>
+      <el-row v-if="oldPo.code != null" :gutter="20" style="margin-top: 10px;margin-bottom: 10px;">
+        <el-col :span="18">
+          单据时间：{{oldPo.billDate}}
+        </el-col>
+        <el-col :span="6">
+
+        </el-col>
+      </el-row>
+      <goods-list-com :goodsList.sync="oldGoodsList" :list-loading.sync="loading" ref="goodsListCom"/>
+      <div class="filter-container" style="margin-top: 5px;">
+        <el-button type="primary" :loading="loading" :disabled="oldGoodsList.every(g => !g.isBack)" @click="doPayment">结算</el-button>
       </div>
-    </el-dialog>
+    </div>
+    <payment :show.sync="showPayment" :totalBackAmount="totalBackAmount" :paymentList="paymentList" :vip="vip" @pay="pay"/>
   </div>
 </template>
 
 <script>
-  import {getList, save as saveRole, deleteEle} from '@/api/user/user'
-  import {getList as searchRole} from '@/api/user/role'
-  import Pagination from '@/components/Pagination'
+  import {findByBillCode, doBack, backPayment} from '@/api/pos/back'
+  import Sticky from '@/components/Sticky'
   import permission from '@/directive/permission/index.js'
+  import {getList as getChannelList} from '@/api/info/channel'
+  import goodsListCom from '@/z/pos/back/goodsListCom'
+  import payment from '@/z/pos/back/payment'
+  import PrintJs from 'print-js'
+
 
   export default {
-    name: 'role',
-    components: {Pagination},
-    directives: { permission },
+    name: 'back',
+    computed: {},
+    components: {Sticky, goodsListCom, payment},
+    directives: {permission},
     filters: {},
     data() {
       return {
-        //列表相关
-        listQuery: {
-          searchKey: '',
-          pageIndex: 1,
-          pageSize: 10,
-          name: '',
-          account: '',
-          passwd: ''
-        },
-        selectedIds: [],
-        list: [],
-        total: 0,
-        listLoading: false,
-        //新增修改
-        saving: false,
-        dialogFormVisible: false,
-        dialogStatus: '',
-        temp: {id: '', name: '', passwd: '', account: '', roleId: ''},
-        rules: {
-          name: [{required: true, message: '必填字段', trigger: 'blur'}],
-          account: [{required: true, message: '必填字段', trigger: 'blur'}],
-          passwd: [{required: true, message: '必填字段', trigger: 'blur'}],
-          roleId: [{required: true, message: '必填字段', trigger: 'blur'}],
-        },
-        //查询角色
-        optionRoleList: [],
-        loadingOptionRoleList: false
-
+        loading: false,
+        //渠道
+        loadingChannelList: false,
+        channelList: [],
+        channelId: '',
+        //单号
+        billCode: '',
+        //货品列表
+        oldPo: {},
+        oldBillCode: '',
+        oldGoodsList: [],
+        showPayment: false,
+        paymentList: [],
+        totalBackAmount: 0,
+        vip: {},
+        baseApi: process.env.BASE_API
       }
     },
     created() {
-      this.getList()
+      this.loadingChannelList = true
+      getChannelList({pageIndex: 1, pageSize: 99999}).then(response => {
+        this.channelList = response.data.content
+        if (this.channelList.length > 0) {
+          this.channelId = this.channelList[0].id
+          this.init()
+        }
+      }).finally(() => this.loadingChannelList = false)
     },
     methods: {
-      //获取列表
-      getList() {
-        if (!this.listLoading) {
-          this.listLoading = true
-          getList(this.listQuery).then(response => {
-            this.selectedIds = []
-            this.list = response.data.content
-            this.total = response.data.totalElements
-            this.listLoading = false
+      //切换渠道
+      changeChannel() {
+        this.init()
+      },
+      searchBill() {
+        this.loading = true
+        this.oldPo = {}
+        findByBillCode({channelId: this.channelId, billCode: this.billCode}).then(response => {
+          this.oldPo = response.data.posCashPo
+          this.oldBillCode = this.billCode
+          response.data.goodsList.forEach(g => {
+            g.backCount = g.billCount;
+            g.isBack = false
           })
-        }
+          this.oldGoodsList = response.data.goodsList
+          this.billCode = ''
+        }).catch(() => this.oldPo = {}).finally(() => this.loading = false)
       },
-      //选择
-      selectionChange(val) {
-        this.selectedIds = val
+      //支付
+      pay(paymentList) {
+        doBack({billCode: this.oldBillCode, goodsList: this.oldGoodsList.filter(g => g.isBack), paymentList: paymentList}).then(response => {
+          this.showPayment = false
+          this.init()
+          this.$message({message: '操作成功', type: 'success'})
+          //弹出打印
+          PrintJs({printable: this.baseApi + '/api/pos/cash/print?code=' + response.data.code, type: 'pdf', header: '收银', maxWidth: 800, headerStyle: 'font-weight: 300;', targetStyles: ['*']})
+        }).finally(() => this.loading = false)
       },
-      //弹出框新增
-      createElement() {
-        this.temp = {id: '', name: '', passwd: '', account: '', roleId: ''}
-        this.dialogStatus = 'create'
-        this.dialogFormVisible = true
-        this.$nextTick(() => {
-          this.$refs['userForm'].clearValidate()
-        })
-        this.searchRoleOption(' ')
-      },
-      //弹出框修改
-      updateElement() {
-        this.dialogFormVisible = true
-        this.dialogStatus = 'update'
-        this.temp = this.list.find(r => r.id === this.selectedIds[0].id)
-        this.optionRoleList = [];
-        this.optionRoleList.push({id: this.temp.roleId, name: this.temp.roleName})
-        this.$nextTick(() => {
-          this.$refs['userForm'].clearValidate()
-        })
-      },
-      //保存数据
-      saveData() {
-        this.$refs['userForm'].validate((valid) => {
-          if (valid) {
-            this.saving = true
-            saveRole(this.temp).then(response => {
-              this.dialogFormVisible = false
-              this.$message({message: response.message, type: 'success'});
-              this.getList()
-            }).finally(() => this.saving = false)
-          }
-        })
-      },
-      //删除
-      deleteElement() {
-        this.$confirm('确定要删除选中的数据吗?', '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
-          deleteEle({ids: this.selectedIds.map(s => s.id)}).then(response => {
-            this.$message({message: response.message, type: 'success'});
-            this.getList()
+      //退货支付方式
+      doPayment() {
+        this.loading = true
+        backPayment({billCode: this.oldBillCode, goodsList: this.oldGoodsList.filter(g => g.isBack)}).then(response => {
+          response.data.paymentList.forEach(p => p.oldAmount = p.amount)
+          let totalAmount = response.data.paymentList.filter(p => p.oldAmount != null).reduce((t, d) => t + parseFloat(d.oldAmount), 0)
+          response.data.paymentList.forEach(p => {
+            p.amount = 0
           })
-        })
+          this.paymentList = response.data.paymentList
+          this.totalBackAmount = response.data.totalBackAmount
+          this.vip = response.data.vip
+          this.showPayment = true
+          // this.init()
+          // this.$message({message: '操作成功', type: 'success'})
+        }).finally(() => this.loading = false)
       },
-      //查询角色
-      searchRoleOption(query) {
-        if (query !== '') {
-          this.loadingOptionRoleList = true
-          searchRole({pageIndex: 1, pageSize: 10, name: query}).then(response => {
-            this.optionRoleList = response.data.content
-          }).finally(() => this.loadingOptionRoleList = false)
-        }
+      //初始化页面
+      init() {
+        this.oldPo = {}
+        this.billCode = ''
+        this.oldGoodsList = []
       }
     }
   }

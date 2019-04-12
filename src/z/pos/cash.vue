@@ -45,9 +45,10 @@
             <el-button type="primary" @click="showPayment = true" :disabled="goodsList.length == 0">结算</el-button>
             <el-button type="success" plain @click="showPuUp = true">挂单</el-button>
             <el-button type="warning" plain @click="showDayKnots = true">日结</el-button>
+            <el-button type="success" plain @click="showPrint = true">单据打印</el-button>
           </div>
-          <!--<saleActivity :channelId="channelId"/>-->
-          <payment :show.sync="showPayment" :vip="vip" :totalAmount="totalAmount" :loading.sync="loading" @pay="pay"/>
+          <payment :show.sync="showPayment" :vip="vip" :totalAmount="totalAmount" :loading.sync="loading" @pay="pay" @updateCouponList="updateCouponList"/>
+          <rePrint :show.sync="showPrint" :vip="vip" :channelId="channelId" :loading.sync="loading" @pay="pay" @updateCouponList="updateCouponList"/>
         </el-tab-pane>
         <el-tab-pane label="查询库存" name="SEARCH_STOCK">
           <searchStock/>
@@ -71,6 +72,7 @@
   import searchStock from '@/z/pos/cash/searchStock'
   import searchSale from '@/z/pos/cash/searchSale'
   import searchVip from '@/z/pos/cash/searchVip'
+  import rePrint from '@/z/pos/cash/rePrint'
   import saleActivity from '@/z/pos/cash/saleActivity'
   import payment from '@/z/pos/cash/payment'
   import {searchBarCode, pay} from '@/api/pos/pos'
@@ -82,6 +84,7 @@
   import dayKnotsCom from '@/z/pos/cash/dayKnotsCom'
 
 
+
   export default {
     name: 'cash',
     computed: {
@@ -89,7 +92,7 @@
         return this.goodsList.reduce((t, d) => t + parseFloat(d.amount), 0)
       }
     },
-    components: {Sticky, inputGoods1, goodsListCom, searchStock, searchSale, searchVip, saleActivity, payment, putUpCom, dayKnotsCom},
+    components: {Sticky, inputGoods1, goodsListCom, searchStock, searchSale, searchVip, saleActivity, payment, putUpCom, dayKnotsCom, rePrint},
     directives: {permission},
     filters: {},
     data() {
@@ -120,7 +123,12 @@
         //挂单
         showPuUp: false,
         //日结
-        showDayKnots: false
+        showDayKnots: false,
+        //使用的待用卷
+        couponList: [],
+        //打印
+        showPrint: false,
+        baseApi: process.env.BASE_API
       }
     },
     created() {
@@ -154,13 +162,15 @@
       },
       addGoods(goods) {
         goods.cashStatus = this.cashStatus
-        goods.billCount = this.inputCount
+        goods.billCount = this.inputCount * this.cashStatus
         goods.remarks = ''
         goods.employId = this.lastEmploy.id
         goods.employCode = this.lastEmploy.code
         goods.employName = this.lastEmploy.name
-        goods.pointId = this.lastPoint.id
-        goods.pointCode = this.lastPoint.code
+        //默认的商场扣点
+        let channel = this.channelList.find(c => c.id === this.channelId)
+        goods.pointId = channel.marketPointId
+        goods.pointCode = channel.marketPointCode
         goods.amount = goods.stockCount = 0
         goods.isVipDiscount = goods.isDiyPrice = false
         goods.vipDiscount = 1
@@ -172,7 +182,7 @@
         }
         let inGoods = this.goodsList.find(g => g.code === goods.code && g.goodsSizeId === goods.goodsSizeId && g.goodsColorId === goods.goodsColorId && g.cashStatus === goods.cashStatus)
         if (inGoods == null) {
-          goods.price = goods.tagPrice
+          goods.price = goods.salePrice = goods.tagPrice
           this.loading = true
           stockInfo({channelId: this.channelId, goodsId: goods.id, goodsColorId: goods.goodsColorId, goodsSizeId: goods.goodsSizeId}).then(response => {
             if (response.data != null) {
@@ -218,7 +228,12 @@
       doSetAllGoods() {
         //初始化价格
         this.goodsList.filter(g => !g.isDiyPrice).forEach(g => {
-          g.price = g.tagPrice
+          g.price = g.salePrice = g.tagPrice
+        })
+        //手动改价促销活动为空
+        this.goodsList.filter(g => g.isDiyPrice).forEach(g => {
+          g.canJoinActivityList = [{id: '', name: '请选择'}]
+          g.activityId = ''
         })
         //设置促销活动
         let self = this
@@ -243,7 +258,7 @@
           if (!g.isDiyPrice && g.isVipDiscount) {
             g.price = Math.ceil(g.vipDiscount * g.price * 100) / 100
           }
-          g.discount = g.price / g.tagPrice
+          g.discount = g.price / g.salePrice
           g.amount = g.price * g.billCount
         })
       },
@@ -255,12 +270,12 @@
               //货品改折扣
               let rr = activity.activityRuleRangeList.find(rg => (rg.goodsBrandId == null || rg.goodsBrandId === g.brandId) && (rg.goodsCategoryId == null || rg.goodsCategoryId === g.categoryId) && (rg.goodsSeasonId == null || rg.goodsSeasonId === g.seasonId) && (rg.goodsYearId == null || rg.goodsYearId === g.yearId))
               if (rr != null) {
-                g.price = rr.discount * g.price
+                g.price = g.salePrice = rr.discount * g.tagPrice
               }
               //货品改价
               let rg = activity.activityRuleGoodsList.find(rg => rg.goodsId === g.id)
               if (rg != null) {
-                g.price = rg.price
+                g.price = g.salePrice = rg.price
               }
             })
           } else if (activity.type === 'BUY_DISCOUNT' || activity.type === 'BUY_PLUS') {
@@ -324,12 +339,13 @@
           vo.goodsList.forEach(g => g.vipDiscount = null)
         }
         vo.goodsList.filter(g => g.isDiyPrice).forEach(g => g.diyPrice = g.price)
+        vo.couponList = this.couponList
         pay(vo).then(response => {
           this.showPayment = false
           this.init()
           this.$message({message: '支付成功', type: 'success'})
           //弹出打印
-          PrintJs({printable: 'http://localhost:9527/static/print.html', type: 'pdf', header: '收银', maxWidth: 800, headerStyle: 'font-weight: 300;', targetStyles: ['*']})
+          PrintJs({printable: this.baseApi + '/api/pos/cash/print?code=' + response.data.code, type: 'pdf', header: '收银', maxWidth: 800, headerStyle: 'font-weight: 300;', targetStyles: ['*']})
         }).finally(() => this.loading = false)
       },
       //初始化页面
@@ -349,6 +365,9 @@
           this.vip = json.vip
           this.doSetAllGoods()
         }
+      },
+      updateCouponList(couponList) {
+        this.couponList = couponList
       }
     }
   }

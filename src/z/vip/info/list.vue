@@ -36,9 +36,8 @@
       </el-table-column>
       <el-table-column label="会员性别" align="center">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.sex == 0" type="warning">女</el-tag>
-          <el-tag v-if="scope.row.sex == 1" type="success">男</el-tag>
-          <el-tag v-if="scope.row.sex == -1" type="info">未知</el-tag>
+          <el-tag v-if="scope.row.sex == '女'" type="warning">女</el-tag>
+          <el-tag v-if="scope.row.sex == '男'" type="success">男</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="开卡日期" align="center">
@@ -107,10 +106,9 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="性别" prop="sex">
-              <el-select style="width: 100%" v-model="temp.sex" placeholder="请选择">
-                <el-option label="未知" :value="-1"/>
-                <el-option label="男" :value="1"/>
-                <el-option label="女" :value="0"/>
+              <el-select style="width: 100%" v-model="temp.sex" placeholder="请选择" clearable>
+                <el-option label="男" :value="'男'"/>
+                <el-option label="女" :value="'女'"/>
               </el-select>
             </el-form-item>
           </el-col>
@@ -209,7 +207,7 @@
       },
       //弹出框新增
       createElement() {
-        this.temp = {id: '', name: '', sex: -1, openDate: initDate(), openChannelId: '', openEmployId: ''}
+        this.temp = {id: '', name: '', sex: null, openDate: initDate(), openChannelId: '', openEmployId: ''}
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
         this.$nextTick(() => {

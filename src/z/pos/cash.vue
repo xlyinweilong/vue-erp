@@ -9,7 +9,7 @@
     <div class="app-container">
       <el-tabs v-model="activeName" type="border-card" @tab-click="handleTagPaneClick">
         <el-tab-pane label="收银" name="CASH">
-          <el-form :inline="true" class="demo-form-inline">
+          <el-form :inline="true" class="demo-form-inline" auto-complete="off">
             <el-form-item>
               <el-select :disabled="loading" v-model="inputType" style="width: 120px;" placeholder="请选择">
                 <el-option label="扫码" :value="0"></el-option>
@@ -33,8 +33,11 @@
             <input-goods1 ref="inputGoods1" v-show="inputType === 1" @add-goods="addGoods" :isDetail="loading"></input-goods1>
           </el-form>
           <el-row :gutter="20">
-            <el-col :span="18">
+            <el-col :span="9">
               <searchVip ref="searchVip" :vip="vip" @changeVip="changeVip"/>
+            </el-col>
+            <el-col :span="9">
+              <employCom ref="searchEmploy" @changeEmploy="changeEmploy" :channelId="channelId"/>
             </el-col>
             <el-col :span="6">
               总金额：{{totalAmount}}
@@ -72,6 +75,7 @@
   import searchStock from '@/z/pos/cash/searchStock'
   import searchSale from '@/z/pos/cash/searchSale'
   import searchVip from '@/z/pos/cash/searchVip'
+  import employCom from '@/z/pos/cash/employCom'
   import rePrint from '@/z/pos/cash/rePrint'
   import saleActivity from '@/z/pos/cash/saleActivity'
   import payment from '@/z/pos/cash/payment'
@@ -84,7 +88,6 @@
   import dayKnotsCom from '@/z/pos/cash/dayKnotsCom'
 
 
-
   export default {
     name: 'cash',
     computed: {
@@ -92,7 +95,7 @@
         return this.goodsList.reduce((t, d) => t + parseFloat(d.amount), 0)
       }
     },
-    components: {Sticky, inputGoods1, goodsListCom, searchStock, searchSale, searchVip, saleActivity, payment, putUpCom, dayKnotsCom, rePrint},
+    components: {Sticky, inputGoods1, goodsListCom, searchStock, searchSale, searchVip, saleActivity, payment, putUpCom, dayKnotsCom, rePrint, employCom},
     directives: {permission},
     filters: {},
     data() {
@@ -117,6 +120,7 @@
         diyValues: [],
         //会员
         vip: {id: '', name: '', code: ''},
+        employList: [],
         showPayment: false,
         //促销活动
         totalActivityList: [],
@@ -224,6 +228,10 @@
           })
         }
         this.doSetAllGoods()
+      },
+      //修改会员
+      changeEmploy(employList) {
+        this.employList = employList
       },
       doSetAllGoods() {
         //初始化价格
@@ -340,6 +348,7 @@
         }
         vo.goodsList.filter(g => g.isDiyPrice).forEach(g => g.diyPrice = g.price)
         vo.couponList = this.couponList
+        vo.employList = this.employList
         pay(vo).then(response => {
           this.showPayment = false
           this.init()
@@ -352,6 +361,7 @@
       init() {
         this.$refs.goodsListCom.init()
         this.$refs.searchVip.init()
+        this.$refs.searchEmploy.init()
         this.goodsList = []
         this.vip = {id: '', name: '', code: ''}
         this.lastEmploy = {id: '', name: '', code: ''}

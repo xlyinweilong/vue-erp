@@ -9,7 +9,7 @@
     </sticky>
 
     <div class="tab-container">
-      <el-form ref="billForm" :model="form" :rules="rules" v-loading="loading">
+      <el-form ref="billForm" :model="form" :rules="rules" v-loading="loading" auto-complete="off">
         <el-tabs v-model="activeName" style="margin-top:15px;" type="border-card" @tab-click="handleTagPaneClick">
           <el-tab-pane label="基本资料" name="BASE">
             <el-row :gutter="20">

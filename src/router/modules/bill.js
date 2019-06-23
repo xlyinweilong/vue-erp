@@ -537,6 +537,33 @@ const billRouter = {
           name: 'channel_settlement',
           meta: {title: '渠道结存',power: 'bill_channel_settlement'}
         }
+        // {
+        //   path: 'channel_pos',
+        //   component: () => import('@/z/bill/channel_pos_cash/list'),
+        //   name: 'channel_pos',
+        //   meta: {title: '渠道核销',power: 'bill_channel_nqddc'}
+        // },
+        // {
+        //   path: 'channel_pos_create',
+        //   component: () => import('@/z/bill/channel_pos_cash/detail'),
+        //   name: 'channel_pos_create',
+        //   hidden: true,
+        //   meta: {title: '渠道核销-新增'}
+        // },
+        // {
+        //   path: 'channel_pos_update/:id',
+        //   component: () => import('@/z/bill/channel_pos_cash/detail'),
+        //   name: 'channel_pos_update',
+        //   hidden: true,
+        //   meta: {title: '渠道核销-修改'}
+        // },
+        // {
+        //   path: 'channel_pos_detail/:id',
+        //   component: () => import('@/z/bill/channel_pos_cash/info'),
+        //   name: 'channel_pos_info',
+        //   hidden: true,
+        //   meta: {title: '渠道核销-详情'}
+        // }
       ]
     }
   ]

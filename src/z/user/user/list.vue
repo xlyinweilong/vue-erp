@@ -39,7 +39,7 @@
     <pagination v-show="total>0 && !listLoading" :total="total" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.pageSize" @pagination="getList"/>
 
     <el-dialog :title="dialogStatus==='create' ? '新增' : (temp.id == null ? '加载中...':'修改')" :visible.sync="dialogFormVisible">
-      <el-form ref="userForm" :rules="rules" :model="temp" v-loading="saving || (dialogStatus !='create' && temp.id == null)">
+      <el-form ref="userForm" :rules="rules" auto-complete="off" :model="temp" v-loading="saving || (dialogStatus !='create' && temp.id == null)">
         <el-form-item label="名称" prop="name">
           <el-input v-model.trim="temp.name" @keyup.enter.native="saveData"/>
         </el-form-item>

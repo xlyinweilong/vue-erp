@@ -1,6 +1,6 @@
 <template>
   <div>
-    <sticky class-name="sub-navbar draft" v-if="!isDetail">
+    <sticky class-name="sub-navbar draft">
       <el-select v-model="form.status" placeholder="请选择">
         <el-option label="草稿" value="DRAFT"/>
         <el-option label="提交" value="PENDING"/>
@@ -20,7 +20,7 @@
               </el-col>
               <el-col :span="6">
                 <el-form-item label="单据时间" prop="billDate">
-                  <el-date-picker class="full_with_date" v-model="form.billDate" type="date" format="yyyy-MM-dd" value-format="yyyy-MM-dd" placeholder="选择日期" :picker-options="pickerOptions" :disabled="isDetail"/>
+                  <el-date-picker class="full_with_date" v-model="form.billDate" type="date" format="yyyy-MM-dd" value-format="yyyy-MM-dd" placeholder="选择日期" :picker-options="pickerOptions"/>
                 </el-form-item>
               </el-col>
               <el-col :span="6">
@@ -29,17 +29,8 @@
                 </el-form-item>
               </el-col>
               <el-col :span="6">
-                <el-form-item label="盘次" prop="times">
-                  <el-select style="width: 100%" v-model="form.times" placeholder="请选择">
-                    <el-option v-for="t in [1,2,3]" :label="t" :value="t"/>
-                  </el-select>
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-row :gutter="20">
-              <el-col :span="6">
                 <el-form-item label="渠道" prop="channelId">
-                  <el-select :disabled="isDetail" v-model="form.channelId" filterable clearable remote default-first-option placeholder="请输入渠道" :loading="loadingOptionChannelList" style="width: 100%" :remote-method="searchChannelOption">
+                  <el-select v-model="form.channelId" filterable clearable remote default-first-option placeholder="请输入渠道" :loading="loadingOptionChannelList" style="width: 100%" :remote-method="searchChannelOption">
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
                     <el-option v-for="item in optionChannelList" :value="item.id" :label="item.name +'-'+item.code"/>
                   </el-select>
@@ -47,58 +38,52 @@
               </el-col>
             </el-row>
           </el-tab-pane>
-
           <el-tab-pane label="货品信息" name="GOODS" :disabled="form.channelId == ''">
-            <detail-goods ref="detailGoods" :list-loading="listLoading" :list.sync="list" :channelId="form.channelId"/>
+            <pos-detail-goods ref="detailGoods" :list-loading="listLoading" :goodsList.sync="list" :channelId="form.channelId"/>
           </el-tab-pane>
         </el-tabs>
       </el-form>
 
     </div>
 
+
   </div>
 </template>
 
 <script>
   import Sticky from '@/components/Sticky'
-  import {save, get} from '@/api/bill/channelInventory'
-  import {getList as getChannelList} from '@/api/info/channel'
-  import detailGoods from '@/z/bill/components/detailGoods'
+  import {save, get, getParentBill, getParentBillGoods} from '@/api/bill/channel2channelIn'
+  import posDetailGoods from '@/z/bill/components/posDetailGoods'
   import {initDate,getPickerOptions} from '@/z/bill/components/commonMethod'
   import {backUrl} from '@/z/common/commonMethod'
+  import {getList as getChannelList} from '@/api/info/channel'
 
   export default {
-    name: 'channel_inventory_detail',
+    name: 'channel_pos_detail',
     components: {
-      Sticky,detailGoods
+      Sticky, posDetailGoods
     },
     data() {
       return {
         pickerOptions: getPickerOptions(),
-        //扫锚
-        barCode: '',
-        barCodeAutoFocus: false,
         form: {
           id: '',
-          toChannelId: '',
-          channelId: '',
-          billDate:initDate(),
+          parentBillId: '',
+          billDate: initDate(),
           code: '',
           status: 'PENDING',
-          manualCode:'',
-          times: 1
+          manualCode:''
         },
         //明细列表
         list: [],
         listLoading: false,
         rules: {
           billDate: [{required: true, message: '必填字段', trigger: 'blur'}],
-          channelId: [{required: true, message: '必填字段', trigger: 'blur'}],
-          times: [{required: true, message: '必填字段', trigger: 'blur'}]
+          toChannelId: [{required: true, message: '必填字段', trigger: 'blur'}],
+          channelId: [{required: true, message: '必填字段', trigger: 'blur'}]
         },
         loading: false,
         activeName: 'BASE',
-        isDetail: false,
         //搜索渠道
         loadingOptionChannelList: false,
         optionChannelList: []
@@ -106,17 +91,22 @@
     },
     created() {
       const id = this.$route.params && this.$route.params.id
-      this.isDetail = this.$route.name.indexOf("_detail") > -1;
       if (id != null) {
         this.loading = true
         get({id: id}).then(response => {
-          this.loading = false
           this.form = response.data
           if (this.form.status !== 'DRAFT') {
             this.form.status = 'PENDING'
           }
-          this.optionChannelList.push({id: this.form.channelId, name: this.form.channelName, code: this.form.channelCode})
+          this.optionParentBillList.push({
+            id: this.form.parentBillId, code: this.form.parentBillCode,
+            channelName: this.form.channelName, channelCode: this.form.channelCode, channelId: this.form.channelId
+            , toChannelName: this.form.toChannelName, toChannelCode: this.form.toChannelCode, toChannelId: this.form.toChannelId
+          })
           this.list = response.data.goodsList
+          getParentBillGoods({id: this.form.parentBillId}).then(response => {
+            this.parentList = response.data
+          }).finally(() => this.loading = false)
         }).catch(() => this.loading = false)
       }
     },
@@ -125,6 +115,8 @@
       handleTagPaneClick(tab, event) {
         if (tab.name === 'GOODS') {
           this.$refs.detailGoods.initFocus()
+        }else if (tab.name === 'DIFF') {
+          this.$refs.diffGoods.init()
         }
       },
       //保存
@@ -152,7 +144,7 @@
             save(this.form).then(response => {
               this.loading = false
               this.$message({message: response.message, type: 'success'})
-              backUrl(this, '/bill/channel/channel_inventory')
+              backUrl(this, '/bill/channel/channel2channel_in')
             }).catch((err) => this.loading = false)
           } else {
             this.activeName = 'BASE'
@@ -174,3 +166,5 @@
     }
   }
 </script>
+
+

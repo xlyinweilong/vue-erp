@@ -131,15 +131,6 @@
         <span>{{ scope.row.amount }}</span>
       </template>
     </el-table-column>
-    <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('employ') > -1" label="营业员" align="center" width="200%">
-      <template slot-scope="scope">
-        <el-select v-model="scope.row.employId" filterable clearable remote default-first-option placeholder="请输入营业员" :remote-method="searchEmploy" @change="changeEmploy(scope.row)" :loading="loadingEmploy" style="width: 100%">
-          <i slot="prefix" class="el-input__icon el-icon-search"></i>
-          <el-option v-for="item in optionEmploy" :value="item.id" :label="item.code"/>
-          <el-option v-if="scope.row.employId != '' && scope.row.employId != null && optionEmploy.every(e => e.id != scope.row.employId)" :value="scope.row.employId" :label="scope.row.employCode"/>
-        </el-select>
-      </template>
-    </el-table-column>
     <el-table-column v-if="diyValues.length == 0 || diyValues.indexOf('market_point') > -1" label="结算码" align="center" width="200%">
       <template slot-scope="scope">
         <el-select v-model="scope.row.pointId" filterable clearable remote default-first-option placeholder="请输入商场扣点码" :remote-method="searchPoint" @change="changePoint(scope.row)" :loading="loadingPoint" style="width: 100%">
@@ -249,34 +240,6 @@
         } else {
           row.pointName = ''
           row.pointCode = ''
-        }
-      },
-      //查询员工
-      searchEmploy(query) {
-        if (query !== '') {
-          this.loadingEmploy = true
-          getEmployList({pageIndex: 1, pageSize: 10, searchKey: query}).then(response => {
-            this.optionEmploy = response.data.content
-          }).finally(() => this.loadingEmploy = false)
-        } else {
-          this.optionEmploy = []
-        }
-      },
-      //修改员工
-      changeEmploy(row) {
-        if (row.employId != null && row.employId != '') {
-          let employ = this.optionEmploy.find(e => e.id === row.employId)
-          row.employName = employ.name
-          row.employCode = employ.code
-          this.goodsList.filter(g => g.employId == null || g.employId == '').forEach(g => {
-            g.employId = row.employId
-            g.employName = row.employName
-            g.employCode = row.employCode
-          })
-          this.$emit('update:lastEmploy', {id: row.employId, name: row.employName, code: row.employCode})
-        } else {
-          row.employName = ''
-          row.employCode = ''
         }
       },
       //自定义价格
